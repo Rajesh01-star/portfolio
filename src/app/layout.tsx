@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import clsx from "clsx";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import StarBackground from "@/components/StarBackground";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -39,6 +40,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <StarBackground />
           <main className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10">
             {children}
           </main>
