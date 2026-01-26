@@ -16,8 +16,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Duy Le",
-  description: "Portfolio of Duy Le",
+  title: "Atharv",
+  description: "Portfolio of Atharv",
 };
 
 export default function RootLayout({
@@ -41,7 +41,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <StarBackground />
-          <main className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10">
+          <main className="relative mx-auto mt-6 max-w-xl px-6 z-10">
             {children}
           </main>
         </ThemeProvider>
