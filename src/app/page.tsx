@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <div className="space-y-12 pb-20">
+      <div className="space-y-12 pb-20 bg-[#0E0E0E] rounded-3xl">
         <Hero />
         <TechStack />
 

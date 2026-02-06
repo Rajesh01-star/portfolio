@@ -15,8 +15,8 @@ export function Header() {
     const pathname = usePathname();
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 flex justify-center py-6 backdrop-blur-sm bg-background/50">
-            <nav className="flex items-center justify-between w-full max-w-xl px-6">
+        <header className="w-full flex justify-center pb-6 pt-6 backdrop-blur-sm bg-background/50">
+            <nav className="flex items-center justify-between w-full max-w-xl px-4 sm:px-0">
                 <Link href="/" className="font-bold text-xl tracking-tight hover:opacity-80 transition-opacity uppercase">
                     Atharv
                 </Link>

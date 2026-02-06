@@ -94,23 +94,26 @@ const techStack = [
 
 export function TechStack() {
     return (
-        <section className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {techStack.map((tech, index) => (
-                <motion.div
-                    key={tech.name}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.1 * index }}
-                    className="group flex flex-col items-center justify-center gap-3 p-6 rounded-3xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 transition-colors cursor-default"
-                >
-                    <div className={`text-neutral-500 dark:text-neutral-400 transition-colors duration-300 ${tech.color}`}>
-                        {tech.icon}
-                    </div>
-                    <span className="font-medium text-sm text-neutral-600 dark:text-neutral-300">
-                        {tech.name}
-                    </span>
-                </motion.div>
-            ))}
+        <section className="flex flex-col gap-4">
+            <h2 className="text-xl font-bold text-white px-4 sm:px-0">Tech Stack</h2>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 px-4 sm:px-0">
+                {techStack.map((tech, index) => (
+                    <motion.div
+                        key={tech.name}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.1 * index }}
+                        className="group flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-neutral-900 border border-white/5 hover:border-white/10 hover:bg-neutral-800 transition-all cursor-default aspect-square"
+                    >
+                        <div className={`text-neutral-400 group-hover:text-white transition-colors duration-300 ${tech.color}`}>
+                            {tech.icon}
+                        </div>
+                        <span className="font-medium text-xs text-neutral-400 group-hover:text-neutral-200 transition-colors">
+                            {tech.name}
+                        </span>
+                    </motion.div>
+                ))}
+            </div>
         </section>
     );
 }

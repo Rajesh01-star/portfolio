@@ -4,7 +4,11 @@ import { motion } from "framer-motion";
 
 export function ProfileCard() {
     return (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 relative z-10">
+            {/* Halo Effect */}
+            <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-500/20 rounded-full blur-[100px] -z-10 pointer-events-none mix-blend-screen" />
+            <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-purple-500/20 rounded-full blur-[100px] -z-10 pointer-events-none mix-blend-screen" />
+
             <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-4">
                     <motion.div
