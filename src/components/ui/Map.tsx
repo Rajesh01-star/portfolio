@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Map, { Marker } from 'react-map-gl/maplibre';
 import { useTheme } from "next-themes";
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -12,19 +12,20 @@ export default function MapComponent() {
     useEffect(() => {
         let animationFrameId: number;
         let timeoutId: NodeJS.Timeout;
+        let isDisposed = false;
 
         const animatePlane = () => {
+            if (isDisposed) return;
+
             // Kolkata center: 88.3639, 22.5726
             const centerLng = 88.3639;
             const centerLat = 22.5726;
 
             // Randomize start (Bottom-Right / SE)
-            // Lng > center, Lat < center
             const startLng = centerLng + (0.05 + Math.random() * 0.1);
             const startLat = centerLat - (0.05 + Math.random() * 0.1);
 
             // Randomize end (Top-Left / NW)
-            // Lng < center, Lat > center
             const endLng = centerLng - (0.05 + Math.random() * 0.1);
             const endLat = centerLat + (0.05 + Math.random() * 0.1);
 
@@ -32,13 +33,16 @@ export default function MapComponent() {
             const y = Math.sin(endLng - startLng) * Math.cos(endLat);
             const x = Math.cos(startLat) * Math.sin(endLat) -
                 Math.sin(startLat) * Math.cos(endLat) * Math.cos(endLng - startLng);
-            const rotation = (Math.atan2(y, x) * 180 / Math.PI);
+            const bearing = (Math.atan2(y, x) * 180 / Math.PI);
 
-            const duration = 15000 + Math.random() * 10000;
+            // Slower speed: 40-60 seconds for a leisurely pace
+            const duration = 40000 + Math.random() * 20000;
             const startTime = performance.now();
 
             const frame = (now: number) => {
+                if (isDisposed) return;
                 const elapsed = now - startTime;
+
                 if (elapsed > duration) {
                     setPlane(null);
                     scheduleNextFlight();
@@ -52,7 +56,7 @@ export default function MapComponent() {
                 setPlane({
                     longitude: currentLng,
                     latitude: currentLat,
-                    rotation: rotation
+                    rotation: bearing
                 });
 
                 animationFrameId = requestAnimationFrame(frame);
@@ -62,15 +66,18 @@ export default function MapComponent() {
         };
 
         const scheduleNextFlight = () => {
-            const delay = 3000 + Math.random() * 5000; // More frequent: 3-8s
+            if (isDisposed) return;
+            const delay = 2000 + Math.random() * 3000;
             timeoutId = setTimeout(animatePlane, delay);
         };
 
         scheduleNextFlight();
 
         return () => {
+            isDisposed = true;
             cancelAnimationFrame(animationFrameId);
             clearTimeout(timeoutId);
+            setPlane(null);
         };
     }, []);
 
@@ -118,6 +125,15 @@ export default function MapComponent() {
                     </Marker>
                 )}
             </Map>
-        </div >
+
+            {/* Cloud Layer - Overlaying the map */}
+            <div className="absolute inset-0 pointer-events-none z-10 opacity-40 mix-blend-overlay">
+                {/* Moving Clouds Animation */}
+                <div className="absolute top-0 left-0 w-[200%] h-full flex animate-clouds">
+                    <img src="/cloud.webp" alt="clouds" className="w-1/2 h-full object-cover" />
+                    <img src="/cloud.webp" alt="clouds" className="w-1/2 h-full object-cover" />
+                </div>
+            </div>
+        </div>
     );
 }

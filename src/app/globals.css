@@ -144,3 +144,17 @@ body {
   /* Reduced from 0.5 for very subtle effect */
   transform: translateY(var(--aura-rainbow-offset));
 }
+
+@keyframes clouds {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-clouds {
+  animation: clouds 60s linear infinite;
+}
