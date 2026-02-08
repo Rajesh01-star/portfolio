@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { ThemeToggle } from "./ThemeToggle";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { useTheme } from "next-themes";
+import { useState, useEffect } from "react";
+import { Moon, Sun } from "lucide-react";
 
 const navItems = [
     { name: "blog", href: "/blog" },
@@ -13,10 +15,16 @@ const navItems = [
 
 export function Header() {
     const pathname = usePathname();
+    const { theme, setTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     return (
-        <header className="w-full flex justify-center pb-6 pt-6 backdrop-blur-sm bg-background/50">
-            <nav className="flex items-center justify-between w-full max-w-xl px-4 sm:px-0">
+        <header className="w-full flex justify-center py-5">
+            <nav className="flex items-center justify-between w-full max-w-[540px] px-4 sm:px-0">
                 <Link href="/" className="font-bold text-xl tracking-tight hover:opacity-80 transition-opacity uppercase">
                     Atharv
                 </Link>
@@ -39,7 +47,15 @@ export function Header() {
                             </li>
                         ))}
                     </ul>
-                    <ThemeToggle />
+                    {mounted && (
+                        <button
+                            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                            className="hover:text-black dark:hover:text-white transition-colors p-1"
+                            aria-label="Toggle theme"
+                        >
+                            {theme === "dark" ? <Moon size={18} /> : <Sun size={18} />}
+                        </button>
+                    )}
                 </div>
             </nav>
         </header>

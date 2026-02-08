@@ -95,8 +95,7 @@ const techStack = [
 export function TechStack() {
     return (
         <section className="flex flex-col gap-4">
-            <h2 className="text-xl font-bold text-white px-4 sm:px-0">Tech Stack</h2>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 px-4 sm:px-0">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {techStack.map((tech, index) => (
                     <motion.div
                         key={tech.name}

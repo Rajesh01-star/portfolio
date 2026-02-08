@@ -1,17 +1,21 @@
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
-import { TechStack } from "@/components/TechStack";
+import { InteractiveShowcase } from "@/components/InteractiveShowcase";
+
+import { Projects } from "@/components/Projects";
+import { BlogList } from "@/components/BlogList";
+import { Footer } from "@/components/Footer";
 
 export default function Home() {
   return (
     <>
       <Header />
-      <div className="space-y-12 pb-20 bg-[#0E0E0E] rounded-3xl">
+      <div className="space-y-12">
         <Hero />
-        <TechStack />
-
-        {/* Placeholder for other sections */}
-        <div className="h-screen" />
+        <InteractiveShowcase />
+        <Projects />
+        <BlogList />
+        <Footer />
       </div>
     </>
   );

@@ -5,9 +5,8 @@ import { motion } from "framer-motion";
 export function ProfileCard() {
     return (
         <div className="flex flex-col gap-6 relative z-10">
-            {/* Halo Effect */}
-            <div className="absolute -top-20 -left-20 w-80 h-80 bg-blue-500/20 rounded-full blur-[100px] -z-10 pointer-events-none mix-blend-screen" />
-            <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-purple-500/20 rounded-full blur-[100px] -z-10 pointer-events-none mix-blend-screen" />
+            {/* Halo Effect Removed - Global Background used instead */}
+
 
             <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-4">
@@ -31,7 +30,7 @@ export function ProfileCard() {
                             transition={{ delay: 0.2 }}
                             className="flex items-center gap-2"
                         >
-                            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
                                 Hey, I&apos;m Atharv 👋
                             </h1>
                         </motion.div>
@@ -45,7 +44,7 @@ export function ProfileCard() {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                             </span>
-                            <span className="text-zinc-400 text-sm">Available for work</span>
+                            <span className="text-zinc-400 text-xs sm:text-sm">Available for work</span>
                         </motion.div>
                     </div>
                 </div>
@@ -54,7 +53,7 @@ export function ProfileCard() {
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.4 }}
-                    className="text-lg text-zinc-400 leading-relaxed max-w-2xl"
+                    className="text-base text-zinc-400 leading-relaxed max-w-2xl"
                 >
                     I&apos;m a <span className="text-white font-medium">frontend engineer</span> passionate about building accessible and performant web applications.
                     Currently, I&apos;m focused on <span className="text-white font-medium">React</span>, <span className="text-white font-medium">Next.js</span>, and <span className="text-white font-medium">TypeScript</span>.

@@ -35,13 +35,17 @@ export default function RootLayout({
         )}
       >
         <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
           disableTransitionOnChange
         >
-          <StarBackground />
-          <main className="relative mx-auto mt-6 max-w-xl px-6 z-10">
+          {/* Global Background */}
+          <div className="fixed inset-0 z-[-1] bg-[#050505]">
+            {/* Subtle star background */}
+            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-soft-light"></div>
+            {/* Green Gradient Glow - Top Left-to-Right Spread */}
+            <div className="absolute top-[-300px] left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-green-500/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen" />
+          </div>
+
+          <main className="relative mx-auto mt-6 w-full max-w-[540px] px-4 sm:px-0 z-10 pb-20">
             {children}
           </main>
         </ThemeProvider>

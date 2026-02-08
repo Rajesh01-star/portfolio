@@ -84,10 +84,10 @@ export default function MapComponent() {
                 mapStyle="https://api.maptiler.com/maps/basic-v2-dark/style.json?key=w66xaM0hp1KMOXBriVJp"
                 attributionControl={false}
             >
-                <Marker longitude={88.3639} latitude={22.5726} anchor="bottom" >
-                    <div className="relative flex items-center justify-center">
-                        <div className="w-4 h-4 bg-blue-500 rounded-full z-10" />
-                        <div className="absolute w-12 h-12 bg-blue-500/20 rounded-full animate-ping" />
+                <Marker longitude={88.3639} latitude={22.5726} anchor="center">
+                    <div className="relative flex items-center justify-center w-4 h-4">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full z-10 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                        <div className="absolute w-8 h-8 bg-blue-500/20 rounded-full animate-ping" />
                     </div>
                 </Marker>
 
