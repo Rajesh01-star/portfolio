@@ -8,22 +8,22 @@ import { TechStack } from "./TechStack";
 export function Hero() {
     return (
         <section className="flex flex-col w-full gap-6">
-            <div className="w-full bg-[#0E0E0E]/50 backdrop-blur-md rounded-3xl border border-white/5 overflow-hidden shadow-2xl relative">
+            <div className="w-full bg-white/90 dark:bg-[#0E0E0E]/90 backdrop-blur-md rounded-[20px] border border-black/5 dark:border-white/5 overflow-hidden shadow-2xl relative">
                 {/* Map Section */}
-                <div className="relative w-full h-[240px]">
+                <div className="relative w-full h-[200px]">
                     <div className="absolute inset-0 z-0">
                         <Map />
                     </div>
                     {/* Time Widget */}
-                    <div className="absolute top-4 right-4 z-20">
+                    <div className="absolute top-2 right-2 z-20">
                         <TimeWidget />
                     </div>
                     {/* Gradient Overlay for smooth transition */}
-                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#0E0E0E] to-transparent z-10" />
+                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white dark:from-[#0E0E0E] to-transparent z-10" />
                 </div>
 
                 {/* Profile Section */}
-                <div className="p-6 sm:p-8 flex flex-col gap-8">
+                <div className=" flex flex-col gap-8">
                     <ProfileCard />
 
                     {/* Tech Stack integrated here */}

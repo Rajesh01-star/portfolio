@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Map, { Marker } from 'react-map-gl/maplibre';
+import { useTheme } from "next-themes";
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default function MapComponent() {
+    const { theme } = useTheme();
     const [plane, setPlane] = useState<{ longitude: number; latitude: number; rotation: number } | null>(null);
 
     useEffect(() => {
@@ -81,14 +83,14 @@ export default function MapComponent() {
                     zoom: 11
                 }}
                 style={{ width: '100%', height: '100%' }}
-                mapStyle="https://api.maptiler.com/maps/basic-v2-dark/style.json?key=w66xaM0hp1KMOXBriVJp"
+                mapStyle={theme === 'dark' ? "https://api.maptiler.com/maps/basic-v2-dark/style.json?key=w66xaM0hp1KMOXBriVJp" : "https://api.maptiler.com/maps/basic-v2-light/style.json?key=w66xaM0hp1KMOXBriVJp"}
                 attributionControl={false}
             >
                 <Marker longitude={88.3639} latitude={22.5726} anchor="center">
-                    <div className="relative flex items-center justify-center w-4 h-4">
-                        <div className="w-3 h-3 bg-blue-500 rounded-full z-10 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
-                        <div className="absolute w-8 h-8 bg-blue-500/20 rounded-full animate-ping" />
-                    </div>
+                    <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
                 </Marker>
 
                 {plane && (

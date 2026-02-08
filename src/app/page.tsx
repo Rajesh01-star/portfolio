@@ -10,7 +10,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <div className="space-y-12">
+      <div className="space-y-8">
         <Hero />
         <InteractiveShowcase />
         <Projects />

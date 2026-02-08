@@ -4,6 +4,7 @@ import "./globals.css";
 import clsx from "clsx";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import StarBackground from "@/components/StarBackground";
+import { Aura } from "@/components/ui/Aura";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -38,14 +39,15 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {/* Global Background */}
-          <div className="fixed inset-0 z-[-1] bg-[#050505]">
-            {/* Subtle star background */}
-            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-soft-light"></div>
-            {/* Green Gradient Glow - Top Left-to-Right Spread */}
-            <div className="absolute top-[-300px] left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-green-500/10 rounded-full blur-[150px] pointer-events-none mix-blend-screen" />
+          <div className="fixed inset-0 z-[-1] bg-white dark:bg-[#050505] transition-colors duration-300">
+            {/* Subtle star background - Increased opacity and blended */}
+            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-30 mix-blend-soft-light z-0 pointer-events-none"></div>
+            <StarBackground />
+            {/* Aura Effect */}
+            <Aura />
           </div>
 
-          <main className="relative mx-auto mt-6 w-full max-w-[540px] px-4 sm:px-0 z-10 pb-20">
+          <main className="relative mx-auto mt-2 w-full max-w-[540px] px-4 sm:px-0 z-10 pb-20">
             {children}
           </main>
         </ThemeProvider>

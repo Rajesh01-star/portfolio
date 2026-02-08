@@ -30,7 +30,7 @@ export function ProfileCard() {
                             transition={{ delay: 0.2 }}
                             className="flex items-center gap-2"
                         >
-                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 dark:text-white">
                                 Hey, I&apos;m Atharv 👋
                             </h1>
                         </motion.div>
@@ -44,7 +44,7 @@ export function ProfileCard() {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                             </span>
-                            <span className="text-zinc-400 text-xs sm:text-sm">Available for work</span>
+                            <span className="text-zinc-500 dark:text-zinc-500 text-xs font-medium">Available for work</span>
                         </motion.div>
                     </div>
                 </div>
@@ -53,10 +53,10 @@ export function ProfileCard() {
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.4 }}
-                    className="text-base text-zinc-400 leading-relaxed max-w-2xl"
+                    className="text-sm sm:text-[15px] text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-2xl"
                 >
-                    I&apos;m a <span className="text-white font-medium">frontend engineer</span> passionate about building accessible and performant web applications.
-                    Currently, I&apos;m focused on <span className="text-white font-medium">React</span>, <span className="text-white font-medium">Next.js</span>, and <span className="text-white font-medium">TypeScript</span>.
+                    I&apos;m a <span className="text-neutral-900 dark:text-white font-medium">frontend engineer</span> passionate about building accessible and performant web applications.
+                    Currently, I&apos;m focused on <span className="text-neutral-900 dark:text-white font-medium">React</span>, <span className="text-neutral-900 dark:text-white font-medium">Next.js</span>, and <span className="text-neutral-900 dark:text-white font-medium">TypeScript</span>.
                 </motion.p>
             </div>
         </div>

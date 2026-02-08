@@ -22,10 +22,13 @@ export function TimeWidget() {
     }, []);
 
     return (
-        <div className="font-mono text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 flex items-center gap-2 bg-white/50 dark:bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-neutral-200 dark:border-white/10 shadow-sm">
-            <span>Kolkata, IN</span>
-            <span className="text-neutral-900 dark:text-white font-medium w-[68px] tabular-nums">
+        <div className="font-mono text-xs sm:text-xs text-neutral-400 flex items-center gap-1.5 bg-neutral-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/5 shadow-sm">
+            {/* <span>Kolkata, IN</span> */}
+            <span className="text-white font-medium min-w-[60px] tabular-nums text-center">
                 {time || "--:-- --"}
+            </span>
+            <span className="text-neutral-500 font-medium text-[10px]">
+                IST
             </span>
         </div>
     );
