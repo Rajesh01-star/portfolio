@@ -1,128 +1,188 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import Map, { Marker } from 'react-map-gl/maplibre';
+import Map, { Marker, Source, Layer } from 'react-map-gl/maplibre';
 import { useTheme } from "next-themes";
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default function MapComponent() {
     const { theme } = useTheme();
-    const [plane, setPlane] = useState<{ longitude: number; latitude: number; rotation: number } | null>(null);
+    const mapRef = useRef<any>(null);
+    const requestRef = useRef<number>(0);
+    const [imagesLoaded, setImagesLoaded] = useState(false);
 
+    // Fixed aesthetic route: South-West to North-East
+    const START_POS = { lng: 88.20, lat: 22.40 };
+    const END_POS = { lng: 88.55, lat: 22.75 };
+
+    const initialFeature = {
+        type: 'Feature' as const,
+        geometry: { type: 'Point' as const, coordinates: [START_POS.lng, START_POS.lat] },
+        properties: { rotation: 45 }
+    };
+
+    const loadImages = (map: any) => {
+        if (!map) return;
+
+        const addImage = (name: string, url: string) => {
+            if (map.hasImage(name)) {
+                return;
+            }
+
+            const img = new Image();
+            img.src = url;
+            img.onload = () => {
+                if (!map.hasImage(name)) {
+                    map.addImage(name, img);
+                    setImagesLoaded(true);
+                }
+            };
+            img.onerror = (e) => {
+                console.error(`Error loading ${name}:`, e);
+            };
+        };
+
+        addImage('plane', '/plane.png');
+        addImage('plane-shadow', '/plane-shadow.png');
+    };
+
+    const onMapLoad = (event: any) => {
+        const map = event.target;
+
+        // Initial load
+        loadImages(map);
+        startAnimation(map);
+
+        // Re-load images whenever style changes
+        map.on('styledata', () => {
+            loadImages(map);
+        });
+    };
+
+    // Reload images when theme changes
     useEffect(() => {
-        let animationFrameId: number;
-        let timeoutId: NodeJS.Timeout;
-        let isDisposed = false;
+        const map = mapRef.current?.getMap();
+        if (map && map.isStyleLoaded()) {
+            loadImages(map);
+        }
+    }, [theme]);
 
-        const animatePlane = () => {
-            if (isDisposed) return;
 
-            // Kolkata center: 88.3639, 22.5726
-            const centerLng = 88.3639;
-            const centerLat = 22.5726;
+    const startAnimation = (map: any) => {
+        let startTime = performance.now();
+        const duration = 45000; // 45s flight
+        const pause = 10000; // 10s pause
 
-            // Randomize start (Bottom-Right / SE)
-            const startLng = centerLng + (0.05 + Math.random() * 0.1);
-            const startLat = centerLat - (0.05 + Math.random() * 0.1);
+        const animate = (time: number) => {
+            const timestamp = time - startTime;
+            const totalCycle = duration + pause;
+            const progress = (timestamp % totalCycle) / duration;
 
-            // Randomize end (Top-Left / NW)
-            const endLng = centerLng - (0.05 + Math.random() * 0.1);
-            const endLat = centerLat + (0.05 + Math.random() * 0.1);
+            if (progress <= 1) {
+                // Interpolate Position
+                const currentLng = START_POS.lng + (END_POS.lng - START_POS.lng) * progress;
+                const currentLat = START_POS.lat + (END_POS.lat - START_POS.lat) * progress;
 
-            // Calculate rotation (bearing)
-            const y = Math.sin(endLng - startLng) * Math.cos(endLat);
-            const x = Math.cos(startLat) * Math.sin(endLat) -
-                Math.sin(startLat) * Math.cos(endLat) * Math.cos(endLng - startLng);
-            const bearing = (Math.atan2(y, x) * 180 / Math.PI);
+                // Calculate Bearing
+                const y = Math.sin(END_POS.lng - START_POS.lng) * Math.cos(END_POS.lat);
+                const x = Math.cos(START_POS.lat) * Math.sin(END_POS.lat) -
+                    Math.sin(START_POS.lat) * Math.cos(END_POS.lat) * Math.cos(END_POS.lng - START_POS.lng);
+                const bearing = (Math.atan2(y, x) * 180 / Math.PI);
 
-            // Slower speed: 40-60 seconds for a leisurely pace
-            const duration = 40000 + Math.random() * 20000;
-            const startTime = performance.now();
-
-            const frame = (now: number) => {
-                if (isDisposed) return;
-                const elapsed = now - startTime;
-
-                if (elapsed > duration) {
-                    setPlane(null);
-                    scheduleNextFlight();
-                    return;
+                // Update Data Imperatively
+                const source = map.getSource('plane-source');
+                if (source && source.setData) { // Check setData exists (GeoJSON source)
+                    source.setData({
+                        type: 'Feature',
+                        geometry: { type: 'Point', coordinates: [currentLng, currentLat] },
+                        properties: { rotation: bearing + 75 }
+                    });
                 }
 
-                const progress = elapsed / duration;
-                const currentLng = startLng + (endLng - startLng) * progress;
-                const currentLat = startLat + (endLat - startLat) * progress;
+                // Toggle visibility (ensure visible)
+                if (map.getLayer('plane-layer')) map.setLayoutProperty('plane-layer', 'visibility', 'visible');
+                if (map.getLayer('plane-shadow-layer')) map.setLayoutProperty('plane-shadow-layer', 'visibility', 'visible');
 
-                setPlane({
-                    longitude: currentLng,
-                    latitude: currentLat,
-                    rotation: bearing
-                });
+            } else {
+                // Restart loop
+                startTime = performance.now(); // Reset time for loop
+            }
 
-                animationFrameId = requestAnimationFrame(frame);
-            };
-
-            animationFrameId = requestAnimationFrame(frame);
+            requestRef.current = requestAnimationFrame(animate);
         };
 
-        const scheduleNextFlight = () => {
-            if (isDisposed) return;
-            const delay = 2000 + Math.random() * 3000;
-            timeoutId = setTimeout(animatePlane, delay);
-        };
+        cancelAnimationFrame(requestRef.current);
+        requestRef.current = requestAnimationFrame(animate);
+    };
 
-        scheduleNextFlight();
-
+    useEffect(() => {
         return () => {
-            isDisposed = true;
-            cancelAnimationFrame(animationFrameId);
-            clearTimeout(timeoutId);
-            setPlane(null);
+            cancelAnimationFrame(requestRef.current);
         };
     }, []);
 
     return (
-        <div className="w-full h-full">
+        <div className="w-full h-full relative overflow-hidden">
             <Map
+                ref={mapRef}
                 initialViewState={{
                     longitude: 88.3639,
                     latitude: 22.5726,
                     zoom: 11
                 }}
+                onLoad={onMapLoad}
                 style={{ width: '100%', height: '100%' }}
                 mapStyle={theme === 'dark' ? "https://api.maptiler.com/maps/basic-v2-dark/style.json?key=w66xaM0hp1KMOXBriVJp" : "https://api.maptiler.com/maps/basic-v2-light/style.json?key=w66xaM0hp1KMOXBriVJp"}
                 attributionControl={false}
+                dragPan={false}
+                scrollZoom={false}
+                doubleClickZoom={false}
             >
                 <Marker longitude={88.3639} latitude={22.5726} anchor="center">
-                    <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-500 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-sky-500"></span>
                     </span>
                 </Marker>
 
-                {plane && (
-                    <Marker longitude={plane.longitude} latitude={plane.latitude} anchor="center">
-                        <div
-                            style={{ transform: `rotate(${plane.rotation - 45}deg)` }}
-                            className="relative flex items-center justify-center transition-transform duration-75"
-                        >
-                            <div className="relative">
-                                {/* Shadow - Offset slightly */}
-                                <img
-                                    src="/plane-shadow.png"
-                                    alt="shadow"
-                                    className="absolute top-4 left-4 w-14 h-14 object-contain opacity-50 z-0 pointer-events-none"
-                                />
+                {/* Using React-Map-GL Sources/Layers ensures they are re-added if style resets */}
+                {/* We pass 'initialFeature' to data, but we will update the internal Mapbox source imperatively in animation loop. */}
+                {/* IMPORTANT: If we update 'data' prop here, React will overwrite our imperative updates. So pass static initial data. */}
+                {/* Only render layers if images are fully loaded to prevent errors */}
+                {/* Always render Source/Layers so map.getSource finds them immediately */}
+                <Source id="plane-source" type="geojson" data={initialFeature} />
 
-                                {/* Main Plane - Increased size, No manual contrails */}
-                                <img
-                                    src="/plane.png"
-                                    alt="plane"
-                                    className="w-14 h-14 object-contain drop-shadow-2xl relative z-10"
-                                />
-                            </div>
-                        </div>
-                    </Marker>
+                {imagesLoaded && (
+                    <>
+                        <Layer
+                            id="plane-shadow-layer"
+                            source="plane-source"
+                            type="symbol"
+                            layout={{
+                                'icon-image': 'plane-shadow',
+                                'icon-size': 0.4,
+                                'icon-rotate': ['get', 'rotation'],
+                                'icon-allow-overlap': true,
+                                'icon-ignore-placement': true
+                            }}
+                            paint={{
+                                'icon-opacity': 0.6,
+                                'icon-translate': [15, 15]
+                            }}
+                        />
+                        <Layer
+                            id="plane-layer"
+                            source="plane-source"
+                            type="symbol"
+                            layout={{
+                                'icon-image': 'plane',
+                                'icon-size': 0.4,
+                                'icon-rotate': ['get', 'rotation'],
+                                'icon-allow-overlap': true,
+                                'icon-ignore-placement': true
+                            }}
+                        />
+                    </>
                 )}
             </Map>
 
