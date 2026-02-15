@@ -23,7 +23,7 @@ export function Header() {
     }, []);
 
     return (
-        <header className="w-full flex justify-center py-4">
+        <header className="w-full flex justify-center py-4 mb-4">
             <nav className="flex items-center justify-between w-full max-w-[540px] px-4 sm:px-0">
                 <Link href="/" className="font-bold text-xl tracking-tight text-neutral-900 dark:text-white hover:opacity-80 transition-opacity uppercase">
                     Atharv

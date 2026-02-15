@@ -102,6 +102,14 @@ export default function MapComponent() {
             if (map.getLayer('plane-shadow-layer') && map.getLayoutProperty('plane-shadow-layer', 'visibility') !== 'visible') {
                 map.setLayoutProperty('plane-shadow-layer', 'visibility', 'visible');
             }
+        } else {
+            // Hide when waiting
+            if (map.getLayer('plane-layer') && map.getLayoutProperty('plane-layer', 'visibility') !== 'none') {
+                map.setLayoutProperty('plane-layer', 'visibility', 'none');
+            }
+            if (map.getLayer('plane-shadow-layer') && map.getLayoutProperty('plane-shadow-layer', 'visibility') !== 'none') {
+                map.setLayoutProperty('plane-shadow-layer', 'visibility', 'none');
+            }
         }
 
         if (isAnimatingRef.current) {
@@ -200,7 +208,7 @@ export default function MapComponent() {
                             type="symbol"
                             layout={{
                                 'icon-image': 'plane-shadow',
-                                'icon-size': 0.4,
+                                'icon-size': 0.2,
                                 'icon-rotate': ['get', 'rotation'],
                                 'icon-allow-overlap': true,
                                 'icon-ignore-placement': true
@@ -216,7 +224,7 @@ export default function MapComponent() {
                             type="symbol"
                             layout={{
                                 'icon-image': 'plane',
-                                'icon-size': 0.4,
+                                'icon-size': 0.2,
                                 'icon-rotate': ['get', 'rotation'],
                                 'icon-allow-overlap': true,
                                 'icon-ignore-placement': true
