@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import StarBackground from "@/components/StarBackground";
 import { Aura } from "@/components/ui/Aura";
+import { MusicPlayer } from "@/components/MusicPlayer";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -50,6 +51,11 @@ export default function RootLayout({
           <main className="relative mx-auto mt-2 w-full max-w-[540px] px-4 sm:px-0 z-10 pb-20">
             {children}
           </main>
+
+          {/* Global Music Player Orb */}
+          <div className="fixed bottom-6 right-6 z-50">
+            <MusicPlayer />
+          </div>
         </ThemeProvider>
       </body>
     </html>

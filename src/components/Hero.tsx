@@ -1,7 +1,12 @@
 "use client";
 
-import Map from "@/components/ui/Map";
+import dynamic from "next/dynamic";
 import { ProfileCard } from "./ProfileCard";
+
+const Map = dynamic(() => import("@/components/ui/Map"), {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-neutral-100 dark:bg-neutral-900 animate-pulse" />
+});
 import { TimeWidget } from "./TimeWidget";
 import { TechStack } from "./TechStack";
 

@@ -3,7 +3,6 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { GradualBlur } from './GradualBlur';
-import { MusicPlayer } from './MusicPlayer';
 import { ScrollableBlurSection } from './ScrollableBlurSection';
 
 export const MusicShowcase = () => {
@@ -46,15 +45,6 @@ export const MusicShowcase = () => {
                 />
             </motion.div>
 
-            {/* Fixed Bottom Right Music Widget */}
-            <motion.div
-                initial={{ opacity: 0, y: 100 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1, duration: 0.8 }}
-                className="fixed bottom-10 right-10 z-50"
-            >
-                <MusicPlayer />
-            </motion.div>
         </section>
     );
 };

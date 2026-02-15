@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Map, { Marker, Source, Layer } from 'react-map-gl/maplibre';
+import maplibregl from 'maplibre-gl';
 import { useTheme } from "next-themes";
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 export default function MapComponent() {
     const { theme } = useTheme();
-    const mapRef = useRef<any>(null);
     const requestRef = useRef<number>(0);
     const [imagesLoaded, setImagesLoaded] = useState(false);
+    const isAnimatingRef = useRef(false);
+    const isMountedRef = useRef(true);
+
+    const mapInstanceRef = useRef<maplibregl.Map | null>(null);
 
     // Fixed aesthetic route: South-West to North-East
     const START_POS = { lng: 88.20, lat: 22.40 };
@@ -21,110 +25,150 @@ export default function MapComponent() {
         properties: { rotation: 45 }
     };
 
-    const loadImages = (map: any) => {
-        if (!map) return;
+    const loadImages = useCallback((map: maplibregl.Map) => {
+        if (!map || !map.getStyle()) return;
 
         const addImage = (name: string, url: string) => {
-            if (map.hasImage(name)) {
-                return;
-            }
+            if (map.hasImage(name)) return;
 
-            const img = new Image();
-            img.src = url;
-            img.onload = () => {
+            map.loadImage(url).then((image: any) => {
                 if (!map.hasImage(name)) {
-                    map.addImage(name, img);
-                    setImagesLoaded(true);
+                    // Check if map/style is still valid before adding
+                    if (map.getStyle()) {
+                        // MapLibre loadImage returns objects with { data: ... }
+                        map.addImage(name, image.data);
+                        // Only set state if mounted to avoid leaks
+                        if (isMountedRef.current) {
+                            setImagesLoaded(true);
+                        }
+                    }
                 }
-            };
-            img.onerror = (e) => {
-                console.error(`Error loading ${name}:`, e);
-            };
+            }).catch((error: any) => {
+                console.error(`Error loading ${name}:`, error);
+            });
         };
 
         addImage('plane', '/plane.png');
         addImage('plane-shadow', '/plane-shadow.png');
-    };
+    }, []);
 
-    const onMapLoad = (event: any) => {
-        const map = event.target;
+    const animate = useCallback((time: number) => {
+        // Use internal ref instead of MapRef to avoid type/runtime mismatches
+        const map = mapInstanceRef.current;
 
-        // Initial load
-        loadImages(map);
-        startAnimation(map);
-
-        // Re-load images whenever style changes
-        map.on('styledata', () => {
-            loadImages(map);
-        });
-    };
-
-    // Reload images when theme changes
-    useEffect(() => {
-        const map = mapRef.current?.getMap();
-        if (map && map.isStyleLoaded()) {
-            loadImages(map);
+        // Safety guards
+        if (!map || !map.getStyle() || !map.getSource('plane-source')) {
+            // Check again next frame, or stop if we should custom handle this.
+            // If checking fails, likely style is reloading or map unmounted.
+            // We just loop until it's ready again or cancelled.
+            if (isAnimatingRef.current) {
+                requestRef.current = requestAnimationFrame(animate);
+            }
+            return;
         }
-    }, [theme]);
 
-
-    const startAnimation = (map: any) => {
-        let startTime = performance.now();
+        // Calculate progress
         const duration = 45000; // 45s flight
         const pause = 10000; // 10s pause
+        const totalCycle = duration + pause;
+        const progress = (time % totalCycle) / duration;
 
-        const animate = (time: number) => {
-            const timestamp = time - startTime;
-            const totalCycle = duration + pause;
-            const progress = (timestamp % totalCycle) / duration;
+        if (progress <= 1) {
+            // Interpolate
+            const currentLng = START_POS.lng + (END_POS.lng - START_POS.lng) * progress;
+            const currentLat = START_POS.lat + (END_POS.lat - START_POS.lat) * progress;
 
-            if (progress <= 1) {
-                // Interpolate Position
-                const currentLng = START_POS.lng + (END_POS.lng - START_POS.lng) * progress;
-                const currentLat = START_POS.lat + (END_POS.lat - START_POS.lat) * progress;
+            // Bearing
+            const y = Math.sin(END_POS.lng - START_POS.lng) * Math.cos(END_POS.lat);
+            const x = Math.cos(START_POS.lat) * Math.sin(END_POS.lat) -
+                Math.sin(START_POS.lat) * Math.cos(END_POS.lat) * Math.cos(END_POS.lng - START_POS.lng);
+            const bearing = (Math.atan2(y, x) * 180 / Math.PI);
 
-                // Calculate Bearing
-                const y = Math.sin(END_POS.lng - START_POS.lng) * Math.cos(END_POS.lat);
-                const x = Math.cos(START_POS.lat) * Math.sin(END_POS.lat) -
-                    Math.sin(START_POS.lat) * Math.cos(END_POS.lat) * Math.cos(END_POS.lng - START_POS.lng);
-                const bearing = (Math.atan2(y, x) * 180 / Math.PI);
-
-                // Update Data Imperatively
-                const source = map.getSource('plane-source');
-                if (source && source.setData) { // Check setData exists (GeoJSON source)
-                    source.setData({
-                        type: 'Feature',
-                        geometry: { type: 'Point', coordinates: [currentLng, currentLat] },
-                        properties: { rotation: bearing + 75 }
-                    });
-                }
-
-                // Toggle visibility (ensure visible)
-                if (map.getLayer('plane-layer')) map.setLayoutProperty('plane-layer', 'visibility', 'visible');
-                if (map.getLayer('plane-shadow-layer')) map.setLayoutProperty('plane-shadow-layer', 'visibility', 'visible');
-
-            } else {
-                // Restart loop
-                startTime = performance.now(); // Reset time for loop
+            // Imperative Update
+            // We already checked map.getSource('plane-source') above
+            const source = map.getSource('plane-source') as maplibregl.GeoJSONSource;
+            if (source && source.setData) {
+                source.setData({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: [currentLng, currentLat] },
+                    properties: { rotation: bearing + 75 }
+                });
             }
 
+            // Toggle visibility safely
+            if (map.getLayer('plane-layer') && map.getLayoutProperty('plane-layer', 'visibility') !== 'visible') {
+                map.setLayoutProperty('plane-layer', 'visibility', 'visible');
+            }
+            if (map.getLayer('plane-shadow-layer') && map.getLayoutProperty('plane-shadow-layer', 'visibility') !== 'visible') {
+                map.setLayoutProperty('plane-shadow-layer', 'visibility', 'visible');
+            }
+        }
+
+        if (isAnimatingRef.current) {
             requestRef.current = requestAnimationFrame(animate);
-        };
+        }
+    }, [START_POS.lng, START_POS.lat, END_POS.lng, END_POS.lat]);
 
-        cancelAnimationFrame(requestRef.current);
+
+    const startAnimation = useCallback(() => {
+        if (isAnimatingRef.current) return; // Prevent double trigger
+        isAnimatingRef.current = true;
         requestRef.current = requestAnimationFrame(animate);
-    };
+    }, [animate]);
 
-    useEffect(() => {
-        return () => {
+    const stopAnimation = useCallback(() => {
+        isAnimatingRef.current = false;
+        if (requestRef.current) {
             cancelAnimationFrame(requestRef.current);
-        };
+            requestRef.current = 0;
+        }
     }, []);
+
+    // Separate handler for style data to be stable
+    const handleStyleData = useCallback(() => {
+        const map = mapInstanceRef.current;
+        if (map) {
+            loadImages(map);
+            // Source might be re-added by React-Map-GL automatically, 
+            // but we need to ensure animation loop picks it up.
+            // The animation loop checks for getSource presence, so it should auto-recover.
+        }
+    }, [loadImages]);
+
+    // Handle Map Load
+    const onMapLoad = useCallback((event: any) => {
+        const map = event.target;
+        mapInstanceRef.current = map; // Store instance safely
+        loadImages(map);
+        startAnimation();
+
+        // Handle style data changes (e.g. theme switch causes style reload)
+        // Ensure we don't attach duplicate listeners
+        map.off('styledata', handleStyleData);
+        map.on('styledata', handleStyleData);
+    }, [loadImages, startAnimation, handleStyleData]); // Dependencies stable
+
+    // Lifecycle Cleanup
+    useEffect(() => {
+        isMountedRef.current = true;
+        // Start animation if map is already loaded (re-mount scenario?)
+        // Actually, onLoad handles the start.
+
+        return () => {
+            isMountedRef.current = false;
+            stopAnimation();
+            const map = mapInstanceRef.current;
+            if (map) {
+                map.off('styledata', handleStyleData);
+                // Map removal is handled by react-map-gl component unmount
+            }
+        };
+    }, [stopAnimation, handleStyleData]);
 
     return (
         <div className="w-full h-full relative overflow-hidden">
             <Map
-                ref={mapRef}
+                mapLib={maplibregl}
                 initialViewState={{
                     longitude: 88.3639,
                     latitude: 22.5726,
@@ -137,6 +181,7 @@ export default function MapComponent() {
                 dragPan={false}
                 scrollZoom={false}
                 doubleClickZoom={false}
+                reuseMaps={true} // Helps with Strict Mode double-invoke and context loss
             >
                 <Marker longitude={88.3639} latitude={22.5726} anchor="center">
                     <span className="relative flex h-2.5 w-2.5">
@@ -145,11 +190,6 @@ export default function MapComponent() {
                     </span>
                 </Marker>
 
-                {/* Using React-Map-GL Sources/Layers ensures they are re-added if style resets */}
-                {/* We pass 'initialFeature' to data, but we will update the internal Mapbox source imperatively in animation loop. */}
-                {/* IMPORTANT: If we update 'data' prop here, React will overwrite our imperative updates. So pass static initial data. */}
-                {/* Only render layers if images are fully loaded to prevent errors */}
-                {/* Always render Source/Layers so map.getSource finds them immediately */}
                 <Source id="plane-source" type="geojson" data={initialFeature} />
 
                 {imagesLoaded && (

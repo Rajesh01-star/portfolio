@@ -18,7 +18,7 @@ export const MusicPlayer = () => {
 
     // Sample track URL (using a copyright-free placeholder or one from the example if available)
     // Using a generic reliable placeholder for now.
-    const TRACK_URL = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+    const TRACK_URL = "/social-network.mp3";
 
     useEffect(() => {
         if (audioRef.current) {
@@ -82,6 +82,7 @@ export const MusicPlayer = () => {
             <audio
                 ref={audioRef}
                 src={TRACK_URL}
+                loop
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
                 onEnded={handleEnded}
