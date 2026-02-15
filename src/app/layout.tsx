@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import StarBackground from "@/components/StarBackground";
 import { Aura } from "@/components/ui/Aura";
 import { MusicPlayer } from "@/components/MusicPlayer";
+import { TriggerProvider } from "@/context/TriggerContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -39,23 +40,25 @@ export default function RootLayout({
         <ThemeProvider
           disableTransitionOnChange
         >
-          {/* Global Background */}
-          <div className="fixed inset-0 z-[-1] bg-white dark:bg-[#050505] transition-colors duration-300">
-            {/* Subtle star background - Increased opacity and blended */}
-            {/* <div className="absolute inset-0 bg-[url('/noise.png')] opacity-30 mix-blend-soft-light z-0 pointer-events-none"></div> */}
-            <StarBackground />
-            {/* Aura Effect */}
-            <Aura />
-          </div>
+          <TriggerProvider>
+            {/* Global Background */}
+            <div className="fixed inset-0 z-[-1] bg-white dark:bg-[#050505] transition-colors duration-300">
+              {/* Subtle star background - Increased opacity and blended */}
+              {/* <div className="absolute inset-0 bg-[url('/noise.png')] opacity-30 mix-blend-soft-light z-0 pointer-events-none"></div> */}
+              <StarBackground />
+              {/* Aura Effect */}
+              <Aura />
+            </div>
 
-          <main className="relative mx-auto mt-2 w-full max-w-[540px] px-4 sm:px-0 z-10 pb-20">
-            {children}
-          </main>
+            <main className="relative mx-auto mt-2 w-full max-w-[540px] px-4 sm:px-0 z-10 pb-20">
+              {children}
+            </main>
 
-          {/* Global Music Player Orb */}
-          <div className="fixed bottom-6 right-6 z-50">
-            <MusicPlayer />
-          </div>
+            {/* Global Music Player Orb */}
+            <div className="fixed bottom-6 right-6 z-50">
+              <MusicPlayer />
+            </div>
+          </TriggerProvider>
         </ThemeProvider>
       </body>
     </html>
