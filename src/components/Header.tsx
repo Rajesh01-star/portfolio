@@ -56,9 +56,9 @@ export function Header() {
                                 // Note: This is an extremely short snippet. For the real mechanical switch sound, ideally download the file. 
                                 // But this ensures *some* feedback if the file is missing.
                                 // If you have the file 'switch.mp3', substitute this line:
-                                const audio = new Audio("/switch.mp3");
-                                audio.volume = 0.5;
-                                audio.play().catch(() => { });
+                                // const audio = new Audio("/switch.mp3");
+                                // audio.volume = 0.5;
+                                // audio.play().catch(() => { });
                             }}
                             className="text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white transition-colors p-1"
                             aria-label="Toggle theme"
