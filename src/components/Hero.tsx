@@ -15,7 +15,7 @@ export function Hero() {
         <section className="flex flex-col w-full gap-6">
             {/* Wrapper to allow TimeWidget to breakout of overflow-hidden */}
             <div className="relative w-full">
-                <div className="w-full bg-white/90 dark:bg-[#0E0E0E]/90 backdrop-blur-md rounded-[20px] border border-black/5 dark:border-white/5 overflow-hidden shadow-2xl relative z-0">
+                <div className="w-full relative z-0">
                     {/* Map Section */}
                     <div className="relative w-full h-[200px]">
                         <div className="absolute inset-0 z-0">
@@ -32,7 +32,7 @@ export function Hero() {
 
                         {/* Tech Stack integrated here */}
                         <div className="pt-2">
-                            <TechStack />
+                            {/* <TechStack /> */}
                         </div>
                     </div>
                 </div>

@@ -68,8 +68,8 @@ export default function MapComponent() {
         }
 
         // Calculate progress
-        const duration = 45000; // 45s flight
-        const pause = 10000; // 10s pause
+        const duration = 30000; // 30s flight (slower, more graceful movement)
+        const pause = 500; // 0.5s pause (frequent appearances)
         const totalCycle = duration + pause;
         const progress = (time % totalCycle) / duration;
 
@@ -208,10 +208,11 @@ export default function MapComponent() {
                             type="symbol"
                             layout={{
                                 'icon-image': 'plane-shadow',
-                                'icon-size': 0.2,
+                                'icon-size': 0.35,
                                 'icon-rotate': ['get', 'rotation'],
                                 'icon-allow-overlap': true,
-                                'icon-ignore-placement': true
+                                'icon-ignore-placement': true,
+                                'visibility': 'visible'
                             }}
                             paint={{
                                 'icon-opacity': 0.6,
@@ -224,10 +225,11 @@ export default function MapComponent() {
                             type="symbol"
                             layout={{
                                 'icon-image': 'plane',
-                                'icon-size': 0.2,
+                                'icon-size': 0.35,
                                 'icon-rotate': ['get', 'rotation'],
                                 'icon-allow-overlap': true,
-                                'icon-ignore-placement': true
+                                'icon-ignore-placement': true,
+                                'visibility': 'visible'
                             }}
                         />
                     </>
