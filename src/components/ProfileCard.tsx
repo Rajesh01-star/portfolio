@@ -9,23 +9,22 @@ export function ProfileCard() {
         <div className="flex flex-col gap-6 relative z-10">
             {/* Halo Effect Removed - Global Background used instead */}
 
-
             <div className="flex flex-col gap-4">
                 <div className="flex items-center gap-4 px-1">
-                    <div className="relative group cursor-pointer">
-                        <motion.div
-                            initial={{ scale: 0.5, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.5 }}
-                            className="h-16 w-16 rounded-full overflow-hidden shadow-lg relative z-20"
-                        >
+                    <motion.div
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="relative"
+                    >
+                        <div className="w-16 h-16 rounded-full border-3 border-gray-200 dark:border-zinc-700 overflow-hidden">
                             <img
                                 src="/atharv.jpeg"
                                 alt="Atharv"
-                                className="h-full w-full object-cover transition-all duration-300 group-hover:saturate-[0.7]"
+                                className="w-full h-full object-cover scale-130"
                             />
-                        </motion.div>
-                    </div>
+                        </div>
+                    </motion.div>
 
                     <div className="flex flex-col">
                         <motion.div

@@ -29,11 +29,6 @@ export function Hero() {
                     {/* Profile Section */}
                     <div className=" flex flex-col gap-8">
                         <ProfileCard />
-
-                        {/* Tech Stack integrated here */}
-                        <div className="pt-2">
-                            {/* <TechStack /> */}
-                        </div>
                     </div>
                 </div>
 

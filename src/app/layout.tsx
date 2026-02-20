@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import StarBackground from "@/components/StarBackground";
 import { Aura } from "@/components/ui/Aura";
-import { MusicPlayer } from "@/components/MusicPlayer";
+import { FloatingActionBar } from "@/components/FloatingActionBar";
 import { TriggerProvider } from "@/context/TriggerContext";
 
 const inter = Inter({
@@ -54,10 +54,8 @@ export default function RootLayout({
               {children}
             </main>
 
-            {/* Global Music Player Orb */}
-            <div className="fixed bottom-6 right-6 z-50">
-              <MusicPlayer />
-            </div>
+            {/* Global Music Player & Chat Action Bar */}
+            <FloatingActionBar />
           </TriggerProvider>
         </ThemeProvider>
       </body>

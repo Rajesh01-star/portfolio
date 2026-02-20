@@ -68,9 +68,9 @@ export default function MapComponent() {
         }
 
         // Calculate progress
-        const duration = 30000; // 30s flight (slower, more graceful movement)
+        const duration = 70000; // 30s flight (slower, more graceful movement)
         const pause = 500; // 0.5s pause (frequent appearances)
-        const totalCycle = duration + pause;
+        const totalCycle = duration
         const progress = (time % totalCycle) / duration;
 
         if (progress <= 1) {
