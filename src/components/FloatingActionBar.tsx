@@ -6,7 +6,7 @@ import { MusicPlayer } from './MusicPlayer';
 import { ChatInterface } from './ChatInterface';
 import { FloatingDock } from '@/components/ui/floating-dock';
 import { useTheme } from "next-themes";
-import { Moon, Sun, X } from "lucide-react";
+import { Moon, Sun, X, Zap } from "lucide-react";
 import { HomeIcon } from "@/components/ui/home";
 import { FeatherIcon } from "@/components/ui/feather";
 import { SnowflakeIcon } from "@/components/ui/snowflake";
@@ -41,8 +41,12 @@ export const FloatingActionBar: React.FC = () => {
         })),
         {
             title: "Theme",
-            icon: mounted ? (theme === "dark" ? <Moon size={18} /> : <Sun size={18} />) : <Sun size={18} />,
-            onClick: () => setTheme(theme === "dark" ? "light" : "dark")
+            icon: mounted ? (theme === "dark" ? <Moon size={18} /> : theme === "vibe" ? <Zap size={18} /> : <Sun size={18} />) : <Sun size={18} />,
+            onClick: () => {
+                if (theme === "light") setTheme("dark");
+                else if (theme === "dark") setTheme("vibe");
+                else setTheme("light");
+            }
         },
         {
             title: "Chat",
@@ -52,7 +56,7 @@ export const FloatingActionBar: React.FC = () => {
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 w-full z-50 flex flex-col items-center justify-end pb-6 pointer-events-none">
+        <div className="fixed bottom-0 left-0 w-full z-50 flex flex-col items-center justify-end pb-4 pointer-events-none">
             <div className="relative pointer-events-auto flex flex-col items-center w-full sm:w-[540px]">
                 {/* Pop-up Chat Window */}
                 <AnimatePresence>

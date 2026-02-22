@@ -2,8 +2,8 @@
 /* @plugin "tailwindcss-animate"; */
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
-@variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:is(.dark *, .vibe *));
+@variant dark (&:where(.dark, .dark *, .vibe, .vibe *));
 
 body {
   color: #ededed;
@@ -230,7 +230,8 @@ body {
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-.dark {
+.dark,
+.vibe {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

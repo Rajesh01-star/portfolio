@@ -184,7 +184,7 @@ export default function MapComponent() {
                 }}
                 onLoad={onMapLoad}
                 style={{ width: '100%', height: '100%' }}
-                mapStyle={theme === 'dark' ? "https://api.maptiler.com/maps/basic-v2-dark/style.json?key=w66xaM0hp1KMOXBriVJp" : "https://api.maptiler.com/maps/basic-v2-light/style.json?key=w66xaM0hp1KMOXBriVJp"}
+                mapStyle={theme === 'dark' || theme === 'vibe' ? "https://api.maptiler.com/maps/basic-v2-dark/style.json?key=w66xaM0hp1KMOXBriVJp" : "https://api.maptiler.com/maps/basic-v2-light/style.json?key=w66xaM0hp1KMOXBriVJp"}
                 attributionControl={false}
                 dragPan={false}
                 scrollZoom={false}
