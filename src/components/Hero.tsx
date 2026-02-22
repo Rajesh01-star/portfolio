@@ -23,7 +23,7 @@ export function Hero() {
                         </div>
 
                         {/* Gradient Overlay for smooth transition */}
-                        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white dark:from-[#0E0E0E] to-transparent z-10" />
+                        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white dark:from-[#0E0E0E] vibe:from-transparent to-transparent z-10" />
                     </div>
 
                     {/* Profile Section */}

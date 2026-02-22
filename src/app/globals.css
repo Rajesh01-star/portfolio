@@ -5,6 +5,9 @@
 @custom-variant dark (&:is(.dark *, .vibe *));
 @variant dark (&:where(.dark, .dark *, .vibe, .vibe *));
 
+@custom-variant vibe (&:is(.vibe *));
+@variant vibe (&:where(.vibe, .vibe *));
+
 body {
   color: #ededed;
   background: #0a0a0a;

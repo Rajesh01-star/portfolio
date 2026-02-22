@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export function Footer() {
     return (
-        <footer className="w-full py-8 text-center text-sm text-zinc-600 border-t border-white/5 mt-12">
+        <footer className="w-full py-8 text-center text-sm text-zinc-600 dark:text-zinc-400 vibe:text-white/60 border-t border-white/5 vibe:border-white/10 mt-12">
             <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-center gap-6">
                     <Link href="https://github.com" target="_blank" className="hover:text-white transition-colors">
@@ -20,7 +20,7 @@ export function Footer() {
                 <p>
                     &copy; {new Date().getFullYear()} Atharv. All rights reserved.
                 </p>
-                <p className="text-xs text-zinc-700">
+                <p className="text-xs text-zinc-700 dark:text-zinc-500 vibe:text-white/40">
                     Last updated: Feb 08, 2026
                 </p>
             </div>

@@ -92,7 +92,7 @@ const WeeklySchedule: React.FC = () => {
         initial={{ opacity: 0, scale: 0.98 }}
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
-        className="bg-white dark:bg-[#0F0F0F] border border-gray-100 dark:border-[#1F1F1F] rounded-xl p-4 md:p-5 shadow-xl relative min-h-[220px] flex flex-col justify-between"
+        className="bg-white dark:bg-[#0F0F0F] vibe:bg-white/5 border border-gray-100 dark:border-[#1F1F1F] vibe:border-white/10 rounded-xl p-4 md:p-5 shadow-xl relative min-h-[220px] flex flex-col justify-between"
       >
         {/* Top bar: Day and Full Date */}
         <div className="flex justify-between items-start mb-4">
@@ -122,18 +122,18 @@ const WeeklySchedule: React.FC = () => {
                 key={item.shortDay}
                 onClick={() => setActiveIndex(index)}
                 className={`flex flex-col items-center justify-center min-w-[42px] py-2.5 rounded-lg transition-all duration-300 group relative overflow-visible ${isActive
-                  ? 'bg-[#5D5FEF] text-white shadow-md dark:bg-white dark:text-[#5D5FEF]'
-                  : 'text-gray-400 hover:text-gray-600 dark:text-white/40 dark:hover:text-white/60'
+                  ? 'bg-[#5D5FEF] text-white shadow-md dark:bg-white dark:text-[#5D5FEF] vibe:bg-white/20 vibe:text-white'
+                  : 'text-gray-400 hover:text-gray-600 dark:text-white/40 dark:hover:text-white/60 vibe:text-white/40 vibe:hover:text-white'
                   }`}
               >
                 {/* Today indicator */}
                 {isToday && !isActive && (
                   <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full animate-pulse " />
                 )}
-                <span className={`text-sm font-bold mb-0.5 ${isActive ? 'text-white dark:text-[#5D5FEF]' : 'text-gray-900 dark:text-white'}`}>
+                <span className={`text-sm font-bold mb-0.5 ${isActive ? 'text-white dark:text-[#5D5FEF] vibe:text-white' : 'text-gray-900 dark:text-white vibe:text-white'}`}>
                   {item.date}
                 </span>
-                <span className={`text-[8px] font-bold tracking-wider ${isActive ? 'text-white/90 dark:text-[#5D5FEF]' : 'text-gray-400 dark:text-white/40'}`}>
+                <span className={`text-[8px] font-bold tracking-wider ${isActive ? 'text-white/90 dark:text-[#5D5FEF] vibe:text-white' : 'text-gray-400 dark:text-white/40 vibe:text-white/40'}`}>
                   {item.shortDay}
                 </span>
               </button>

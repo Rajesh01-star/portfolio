@@ -6,10 +6,62 @@ import maplibregl from 'maplibre-gl';
 import { useTheme } from "next-themes";
 import 'maplibre-gl/dist/maplibre-gl.css';
 
+const getRandomPos = () => ({
+    lng: 88.3639 + (Math.random() - 0.5) * 0.15,
+    lat: 22.5726 + (Math.random() - 0.5) * 0.15
+});
+
+const BalloonMarker = ({ isReady }: { isReady: boolean }) => {
+    const startRef = useRef(getRandomPos());
+    const endRef = useRef(getRandomPos());
+    const startTimeRef = useRef<number | null>(null);
+    const [pos, setPos] = useState(startRef.current);
+
+    useEffect(() => {
+        if (!isReady) return;
+
+        let frame: number;
+        const animate = (time: number) => {
+            if (!startTimeRef.current) startTimeRef.current = time;
+            const elapsed = time - startTimeRef.current;
+            const duration = 20000; // 20s per random segment (faster)
+            const progress = elapsed / duration;
+
+            if (progress >= 1) {
+                // Reached destination, pick a new random endpoint
+                startRef.current = endRef.current;
+                endRef.current = getRandomPos();
+                startTimeRef.current += duration; // Prevent time drift glitch
+            }
+
+            const p = Math.min(progress, 1);
+            // Linear interpolate between current start and end
+            const lng = startRef.current.lng + (endRef.current.lng - startRef.current.lng) * p;
+            const lat = startRef.current.lat + (endRef.current.lat - startRef.current.lat) * p;
+
+            setPos({ lng, lat });
+            frame = requestAnimationFrame(animate);
+        };
+        frame = requestAnimationFrame(animate);
+        return () => cancelAnimationFrame(frame);
+    }, [isReady]);
+
+    return (
+        <Marker longitude={pos.lng} latitude={pos.lat} anchor="bottom" style={{ mixBlendMode: 'screen' }}>
+            <img
+                src="/hot-air-balloon.gif"
+                alt="Hot Air Balloon"
+                className="w-16 h-16 object-contain pointer-events-none drop-shadow-2xl opacity-90 invert hue-rotate-180 brightness-110"
+            />
+        </Marker>
+    );
+};
+
 export default function MapComponent() {
     const { theme } = useTheme();
     const requestRef = useRef<number>(0);
     const [imagesLoaded, setImagesLoaded] = useState(false);
+    const [isZoomFinished, setIsZoomFinished] = useState(false);
     const isAnimatingRef = useRef(false);
     const isMountedRef = useRef(true);
 
@@ -67,10 +119,32 @@ export default function MapComponent() {
             return;
         }
 
+        if (!imagesLoaded) {
+            if (isAnimatingRef.current) {
+                requestRef.current = requestAnimationFrame(animate);
+            }
+            return;
+        }
+
+        // Delay plane animation until zoom finishes (4.5s)
+        if (!isZoomFinished) {
+            // Hide layers while waiting for zoom
+            if (map.getLayer('plane-layer') && map.getLayoutProperty('plane-layer', 'visibility') !== 'none') {
+                map.setLayoutProperty('plane-layer', 'visibility', 'none');
+            }
+            if (map.getLayer('plane-shadow-layer') && map.getLayoutProperty('plane-shadow-layer', 'visibility') !== 'none') {
+                map.setLayoutProperty('plane-shadow-layer', 'visibility', 'none');
+            }
+            if (isAnimatingRef.current) {
+                requestRef.current = requestAnimationFrame(animate);
+            }
+            return;
+        }
+
         // Calculate progress
-        const duration = 70000; // 30s flight (slower, more graceful movement)
-        const pause = 500; // 0.5s pause (frequent appearances)
-        const totalCycle = duration
+        const duration = 40000; // 40s flight (much faster)
+        const pause = 2000; // 2s pause before reappear
+        const totalCycle = duration + pause;
         const progress = (time % totalCycle) / duration;
 
         if (progress <= 1) {
@@ -147,7 +221,23 @@ export default function MapComponent() {
     const onMapLoad = useCallback((event: any) => {
         const map = event.target;
         mapInstanceRef.current = map; // Store instance safely
+
+        // Trigger cinematic zoom-in effect
+        map.flyTo({
+            zoom: 11,
+            duration: 4500, // 4.5 seconds
+            essential: true
+        });
+
         loadImages(map);
+
+        // Wait for the flyTo animation to drastically finish before showing items
+        setTimeout(() => {
+            if (isMountedRef.current) {
+                setIsZoomFinished(true);
+            }
+        }, 4500);
+
         startAnimation();
 
         // Handle style data changes (e.g. theme switch causes style reload)
@@ -180,7 +270,7 @@ export default function MapComponent() {
                 initialViewState={{
                     longitude: 88.3639,
                     latitude: 22.5726,
-                    zoom: 11
+                    zoom: 4 // Start zoomed out
                 }}
                 onLoad={onMapLoad}
                 style={{ width: '100%', height: '100%' }}
@@ -198,6 +288,10 @@ export default function MapComponent() {
                     </span>
                 </Marker>
 
+                {theme === 'vibe' && isZoomFinished && (
+                    <BalloonMarker isReady={isZoomFinished} />
+                )}
+
                 <Source id="plane-source" type="geojson" data={initialFeature} />
 
                 {imagesLoaded && (
@@ -212,7 +306,7 @@ export default function MapComponent() {
                                 'icon-rotate': ['get', 'rotation'],
                                 'icon-allow-overlap': true,
                                 'icon-ignore-placement': true,
-                                'visibility': 'visible'
+                                'visibility': 'none'
                             }}
                             paint={{
                                 'icon-opacity': 0.6,
@@ -229,7 +323,7 @@ export default function MapComponent() {
                                 'icon-rotate': ['get', 'rotation'],
                                 'icon-allow-overlap': true,
                                 'icon-ignore-placement': true,
-                                'visibility': 'visible'
+                                'visibility': 'none'
                             }}
                         />
                     </>
