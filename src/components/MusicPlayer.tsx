@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { Play, Pause, SkipBack, SkipForward, Volume2 } from 'lucide-react';
 import { GradualBlur } from './GradualBlur';
 
-export const MusicPlayer = () => {
+export const MusicPlayer = ({ className }: { className?: string }) => {
     const [agentState, setAgentState] = useState<AgentState>("listening");
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -77,7 +77,7 @@ export const MusicPlayer = () => {
     };
 
     return (
-        <div className="relative group w-12 h-12 mx-auto rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg shadow-purple-500/20">
+        <div className={cn("relative group w-full h-full rounded-full overflow-hidden transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-lg shadow-purple-500/20", className)}>
 
             <audio
                 ref={audioRef}
