@@ -8,6 +8,7 @@ import { GlobalBackground } from "@/components/GlobalBackground";
 
 import { FloatingActionBar } from "@/components/FloatingActionBar";
 import { TriggerProvider } from "@/context/TriggerContext";
+import { AudioProvider } from "@/context/AudioContext";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -73,15 +74,17 @@ export default function RootLayout({
         >
           <DynamicFavicon />
           <TriggerProvider>
-            {/* Global Background */}
-            <GlobalBackground />
+            <AudioProvider>
+              {/* Global Background */}
+              <GlobalBackground />
 
-            <main className="relative mx-auto mt-2 w-full max-w-[540px] px-4 sm:px-0 z-10 pb-20">
-              {children}
-            </main>
+              <main className="relative mx-auto mt-2 w-full max-w-[540px] px-4 sm:px-0 z-10 pb-20">
+                {children}
+              </main>
 
-            {/* Global Music Player & Chat Action Bar */}
-            <FloatingActionBar />
+              {/* Global Music Player & Chat Action Bar */}
+              <FloatingActionBar />
+            </AudioProvider>
           </TriggerProvider>
         </ThemeProvider>
       </body>
