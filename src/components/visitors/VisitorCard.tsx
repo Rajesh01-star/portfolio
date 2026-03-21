@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { VisitorCardType } from '../../types';
-import { useVisitorsStore } from '../../store/useVisitorsStore';
+import { VisitorCardType, useVisitorsStore } from '../../store/useVisitorsStore';
 
 interface VisitorCardProps {
   card: VisitorCardType;
