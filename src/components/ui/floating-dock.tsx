@@ -17,6 +17,7 @@ import {
 } from "motion/react";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 
 export const FloatingDock = ({
   items,
@@ -63,9 +64,9 @@ const FloatingDockMobile = ({
             whileTap={{ scale: 0.95 }}
           >
             {item.href ? (
-              <a href={item.href} aria-label={item.title}>
+              <Link href={item.href} aria-label={item.title}>
                 {content}
-              </a>
+              </Link>
             ) : (
               <button onClick={item.onClick} aria-label={item.title} className="cursor-pointer">
                 {content}
@@ -177,7 +178,7 @@ function IconContainer({
   );
 
   return href ? (
-    <a href={href}>{content}</a>
+    <Link href={href}>{content}</Link>
   ) : (
     <button onClick={onClick} className="cursor-pointer">{content}</button>
   );

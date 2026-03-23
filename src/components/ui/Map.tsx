@@ -19,26 +19,20 @@ const BalloonMarker = ({ isReady }: { isReady: boolean }) => {
 
     useEffect(() => {
         if (!isReady) return;
-
         let frame: number;
         const animate = (time: number) => {
             if (!startTimeRef.current) startTimeRef.current = time;
             const elapsed = time - startTimeRef.current;
-            const duration = 20000; // 20s per random segment (faster)
+            const duration = 20000;
             const progress = elapsed / duration;
-
             if (progress >= 1) {
-                // Reached destination, pick a new random endpoint
                 startRef.current = endRef.current;
                 endRef.current = getRandomPos();
-                startTimeRef.current += duration; // Prevent time drift glitch
+                startTimeRef.current += duration;
             }
-
             const p = Math.min(progress, 1);
-            // Linear interpolate between current start and end
             const lng = startRef.current.lng + (endRef.current.lng - startRef.current.lng) * p;
             const lat = startRef.current.lat + (endRef.current.lat - startRef.current.lat) * p;
-
             setPos({ lng, lat });
             frame = requestAnimationFrame(animate);
         };
@@ -62,12 +56,16 @@ export default function MapComponent() {
     const requestRef = useRef<number>(0);
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const [isZoomFinished, setIsZoomFinished] = useState(false);
+
+    const imagesLoadedRef = useRef(false);
+    const isZoomFinishedRef = useRef(false);
     const isAnimatingRef = useRef(false);
     const isMountedRef = useRef(true);
-
     const mapInstanceRef = useRef<maplibregl.Map | null>(null);
 
-    // Fixed aesthetic route: South-West to North-East
+    // Track frame count to throttle logs
+    const frameCountRef = useRef(0);
+
     const START_POS = { lng: 88.20, lat: 22.40 };
     const END_POS = { lng: 88.55, lat: 22.75 };
 
@@ -77,26 +75,35 @@ export default function MapComponent() {
         properties: { rotation: 45 }
     };
 
+    const handleSetImagesLoaded = (val: boolean) => {
+        imagesLoadedRef.current = val;
+        setImagesLoaded(val);
+    };
+
+    const handleSetZoomFinished = (val: boolean) => {
+        isZoomFinishedRef.current = val;
+        setIsZoomFinished(val);
+    };
+
     const loadImages = useCallback((map: maplibregl.Map) => {
-        if (!map || !map.getStyle()) return;
+        if (!map || !map.getStyle()) {
+            console.warn('[loadImages] Map or style not ready, skipping.');
+            return;
+        }
 
         const addImage = (name: string, url: string) => {
-            if (map.hasImage(name)) return;
-
+            if (map.hasImage(name)) {
+                // Still mark as loaded in case state wasn't set
+                if (isMountedRef.current) handleSetImagesLoaded(true);
+                return;
+            }
             map.loadImage(url).then((image: any) => {
-                if (!map.hasImage(name)) {
-                    // Check if map/style is still valid before adding
-                    if (map.getStyle()) {
-                        // MapLibre loadImage returns objects with { data: ... }
-                        map.addImage(name, image.data);
-                        // Only set state if mounted to avoid leaks
-                        if (isMountedRef.current) {
-                            setImagesLoaded(true);
-                        }
-                    }
+                if (!map.hasImage(name) && map.getStyle()) {
+                    map.addImage(name, image.data);
+                    if (isMountedRef.current) handleSetImagesLoaded(true);
                 }
             }).catch((error: any) => {
-                console.error(`Error loading ${name}:`, error);
+                console.error(`[loadImages] ❌ Error loading "${name}":`, error);
             });
         };
 
@@ -105,95 +112,109 @@ export default function MapComponent() {
     }, []);
 
     const animate = useCallback((time: number) => {
-        // Use internal ref instead of MapRef to avoid type/runtime mismatches
+        frameCountRef.current += 1;
+        const shouldLog = frameCountRef.current % 120 === 0; // Log every ~2 seconds
+
         const map = mapInstanceRef.current;
 
-        // Safety guards
-        if (!map || !map.getStyle() || !map.getSource('plane-source')) {
-            // Check again next frame, or stop if we should custom handle this.
-            // If checking fails, likely style is reloading or map unmounted.
-            // We just loop until it's ready again or cancelled.
-            if (isAnimatingRef.current) {
-                requestRef.current = requestAnimationFrame(animate);
-            }
+        if (!map) {
+            if (shouldLog) console.warn('[animate] ❌ No map instance.');
+            if (isAnimatingRef.current) requestRef.current = requestAnimationFrame(animate);
             return;
         }
 
-        if (!imagesLoaded) {
-            if (isAnimatingRef.current) {
-                requestRef.current = requestAnimationFrame(animate);
-            }
+        if (!map.getStyle()) {
+            if (shouldLog) console.warn('[animate] ❌ Map style not ready.');
+            if (isAnimatingRef.current) requestRef.current = requestAnimationFrame(animate);
             return;
         }
 
-        // Delay plane animation until zoom finishes (4.5s)
-        if (!isZoomFinished) {
-            // Hide layers while waiting for zoom
-            if (map.getLayer('plane-layer') && map.getLayoutProperty('plane-layer', 'visibility') !== 'none') {
-                map.setLayoutProperty('plane-layer', 'visibility', 'none');
-            }
-            if (map.getLayer('plane-shadow-layer') && map.getLayoutProperty('plane-shadow-layer', 'visibility') !== 'none') {
-                map.setLayoutProperty('plane-shadow-layer', 'visibility', 'none');
-            }
-            if (isAnimatingRef.current) {
-                requestRef.current = requestAnimationFrame(animate);
-            }
+        if (!map.getSource('plane-source')) {
+            if (shouldLog) console.warn('[animate] ❌ plane-source not found on map yet.');
+            if (isAnimatingRef.current) requestRef.current = requestAnimationFrame(animate);
             return;
         }
 
-        // Calculate progress
-        const duration = 40000; // 40s flight (much faster)
-        const pause = 2000; // 2s pause before reappear
+        if (!imagesLoadedRef.current) {
+            if (shouldLog) console.warn('[animate] ⏳ Images not loaded yet.');
+            if (isAnimatingRef.current) requestRef.current = requestAnimationFrame(animate);
+            return;
+        }
+
+        if (!isZoomFinishedRef.current) {
+            ['plane-layer', 'plane-shadow-layer'].forEach(id => {
+                if (map.getLayer(id) && map.getLayoutProperty(id, 'visibility') !== 'none') {
+                    map.setLayoutProperty(id, 'visibility', 'none');
+                }
+            });
+            if (isAnimatingRef.current) requestRef.current = requestAnimationFrame(animate);
+            return;
+        }
+
+        const duration = 40000;
+        const pause = 2000;
         const totalCycle = duration + pause;
         const progress = (time % totalCycle) / duration;
 
+        if (shouldLog) {
+        }
+
         if (progress <= 1) {
-            // Interpolate
             const currentLng = START_POS.lng + (END_POS.lng - START_POS.lng) * progress;
             const currentLat = START_POS.lat + (END_POS.lat - START_POS.lat) * progress;
 
-            // Bearing
+            if (shouldLog) {
+                // Check if within map viewport
+                if (map.getBounds) {
+                    const bounds = map.getBounds();
+                    const inView = bounds.contains([currentLng, currentLat]);
+                }
+            }
+
             const y = Math.sin(END_POS.lng - START_POS.lng) * Math.cos(END_POS.lat);
             const x = Math.cos(START_POS.lat) * Math.sin(END_POS.lat) -
                 Math.sin(START_POS.lat) * Math.cos(END_POS.lat) * Math.cos(END_POS.lng - START_POS.lng);
             const bearing = (Math.atan2(y, x) * 180 / Math.PI);
 
-            // Imperative Update
-            // We already checked map.getSource('plane-source') above
             const source = map.getSource('plane-source') as maplibregl.GeoJSONSource;
-            if (source && source.setData) {
+            if (source?.setData) {
                 source.setData({
                     type: 'Feature',
                     geometry: { type: 'Point', coordinates: [currentLng, currentLat] },
                     properties: { rotation: bearing + 75 }
                 });
+            } else {
+                if (shouldLog) console.warn('[animate] ❌ source.setData not available!');
             }
 
-            // Toggle visibility safely
-            if (map.getLayer('plane-layer') && map.getLayoutProperty('plane-layer', 'visibility') !== 'visible') {
+            // Check layers exist before toggling
+            const planeLayerExists = !!map.getLayer('plane-layer');
+            const shadowLayerExists = !!map.getLayer('plane-shadow-layer');
+
+            if (shouldLog) {
+            }
+
+            if (planeLayerExists && map.getLayoutProperty('plane-layer', 'visibility') !== 'visible') {
                 map.setLayoutProperty('plane-layer', 'visibility', 'visible');
             }
-            if (map.getLayer('plane-shadow-layer') && map.getLayoutProperty('plane-shadow-layer', 'visibility') !== 'visible') {
+            if (shadowLayerExists && map.getLayoutProperty('plane-shadow-layer', 'visibility') !== 'visible') {
                 map.setLayoutProperty('plane-shadow-layer', 'visibility', 'visible');
             }
         } else {
-            // Hide when waiting
-            if (map.getLayer('plane-layer') && map.getLayoutProperty('plane-layer', 'visibility') !== 'none') {
-                map.setLayoutProperty('plane-layer', 'visibility', 'none');
-            }
-            if (map.getLayer('plane-shadow-layer') && map.getLayoutProperty('plane-shadow-layer', 'visibility') !== 'none') {
-                map.setLayoutProperty('plane-shadow-layer', 'visibility', 'none');
-            }
+            ['plane-layer', 'plane-shadow-layer'].forEach(id => {
+                if (map.getLayer(id) && map.getLayoutProperty(id, 'visibility') !== 'none') {
+                    map.setLayoutProperty(id, 'visibility', 'none');
+                }
+            });
         }
 
-        if (isAnimatingRef.current) {
-            requestRef.current = requestAnimationFrame(animate);
-        }
-    }, [START_POS.lng, START_POS.lat, END_POS.lng, END_POS.lat]);
-
+        if (isAnimatingRef.current) requestRef.current = requestAnimationFrame(animate);
+    }, []);
 
     const startAnimation = useCallback(() => {
-        if (isAnimatingRef.current) return; // Prevent double trigger
+        if (isAnimatingRef.current) {
+            return;
+        }
         isAnimatingRef.current = true;
         requestRef.current = requestAnimationFrame(animate);
     }, [animate]);
@@ -206,60 +227,37 @@ export default function MapComponent() {
         }
     }, []);
 
-    // Separate handler for style data to be stable
     const handleStyleData = useCallback(() => {
         const map = mapInstanceRef.current;
-        if (map) {
-            loadImages(map);
-            // Source might be re-added by React-Map-GL automatically, 
-            // but we need to ensure animation loop picks it up.
-            // The animation loop checks for getSource presence, so it should auto-recover.
-        }
+        if (map) loadImages(map);
     }, [loadImages]);
 
-    // Handle Map Load
     const onMapLoad = useCallback((event: any) => {
         const map = event.target;
-        mapInstanceRef.current = map; // Store instance safely
+        mapInstanceRef.current = map;
 
-        // Trigger cinematic zoom-in effect
-        map.flyTo({
-            zoom: 11,
-            duration: 4500, // 4.5 seconds
-            essential: true
-        });
-
+        map.flyTo({ zoom: 11, duration: 4500, essential: true });
         loadImages(map);
 
-        // Wait for the flyTo animation to drastically finish before showing items
         setTimeout(() => {
             if (isMountedRef.current) {
-                setIsZoomFinished(true);
+                handleSetZoomFinished(true);
             }
         }, 4500);
 
         startAnimation();
 
-        // Handle style data changes (e.g. theme switch causes style reload)
-        // Ensure we don't attach duplicate listeners
         map.off('styledata', handleStyleData);
         map.on('styledata', handleStyleData);
-    }, [loadImages, startAnimation, handleStyleData]); // Dependencies stable
+    }, [loadImages, startAnimation, handleStyleData]);
 
-    // Lifecycle Cleanup
     useEffect(() => {
         isMountedRef.current = true;
-        // Start animation if map is already loaded (re-mount scenario?)
-        // Actually, onLoad handles the start.
-
         return () => {
             isMountedRef.current = false;
             stopAnimation();
             const map = mapInstanceRef.current;
-            if (map) {
-                map.off('styledata', handleStyleData);
-                // Map removal is handled by react-map-gl component unmount
-            }
+            if (map) map.off('styledata', handleStyleData);
         };
     }, [stopAnimation, handleStyleData]);
 
@@ -267,19 +265,17 @@ export default function MapComponent() {
         <div className="w-full h-full relative overflow-hidden">
             <Map
                 mapLib={maplibregl}
-                initialViewState={{
-                    longitude: 88.3639,
-                    latitude: 22.5726,
-                    zoom: 4 // Start zoomed out
-                }}
+                initialViewState={{ longitude: 88.3639, latitude: 22.5726, zoom: 4 }}
                 onLoad={onMapLoad}
                 style={{ width: '100%', height: '100%' }}
-                mapStyle={theme === 'dark' || theme === 'vibe' ? "https://api.maptiler.com/maps/basic-v2-dark/style.json?key=w66xaM0hp1KMOXBriVJp" : "https://api.maptiler.com/maps/basic-v2-light/style.json?key=w66xaM0hp1KMOXBriVJp"}
+                mapStyle={theme === 'dark' || theme === 'vibe'
+                    ? "https://api.maptiler.com/maps/basic-v2-dark/style.json?key=w66xaM0hp1KMOXBriVJp"
+                    : "https://api.maptiler.com/maps/basic-v2-light/style.json?key=w66xaM0hp1KMOXBriVJp"}
                 attributionControl={false}
                 dragPan={false}
                 scrollZoom={false}
                 doubleClickZoom={false}
-                reuseMaps={true} // Helps with Strict Mode double-invoke and context loss
+                reuseMaps={true}
             >
                 <Marker longitude={88.3639} latitude={22.5726} anchor="center">
                     <span className="relative flex h-2.5 w-2.5">
@@ -294,45 +290,38 @@ export default function MapComponent() {
 
                 <Source id="plane-source" type="geojson" data={initialFeature} />
 
-                {imagesLoaded && (
-                    <>
-                        <Layer
-                            id="plane-shadow-layer"
-                            source="plane-source"
-                            type="symbol"
-                            layout={{
-                                'icon-image': 'plane-shadow',
-                                'icon-size': 0.35,
-                                'icon-rotate': ['get', 'rotation'],
-                                'icon-allow-overlap': true,
-                                'icon-ignore-placement': true,
-                                'visibility': 'none'
-                            }}
-                            paint={{
-                                'icon-opacity': 0.6,
-                                'icon-translate': [15, 15]
-                            }}
-                        />
-                        <Layer
-                            id="plane-layer"
-                            source="plane-source"
-                            type="symbol"
-                            layout={{
-                                'icon-image': 'plane',
-                                'icon-size': 0.35,
-                                'icon-rotate': ['get', 'rotation'],
-                                'icon-allow-overlap': true,
-                                'icon-ignore-placement': true,
-                                'visibility': 'none'
-                            }}
-                        />
-                    </>
-                )}
+                {/* ✅ Always render layers - don't gate on imagesLoaded */}
+                {/* Gating caused layers to not exist when animation tried to show them */}
+                <Layer
+                    id="plane-shadow-layer"
+                    source="plane-source"
+                    type="symbol"
+                    layout={{
+                        'icon-image': 'plane-shadow',
+                        'icon-size': 0.35,
+                        'icon-rotate': ['get', 'rotation'],
+                        'icon-allow-overlap': true,
+                        'icon-ignore-placement': true,
+                        'visibility': 'none'
+                    }}
+                    paint={{ 'icon-opacity': 0.6, 'icon-translate': [15, 15] }}
+                />
+                <Layer
+                    id="plane-layer"
+                    source="plane-source"
+                    type="symbol"
+                    layout={{
+                        'icon-image': 'plane',
+                        'icon-size': 0.35,
+                        'icon-rotate': ['get', 'rotation'],
+                        'icon-allow-overlap': true,
+                        'icon-ignore-placement': true,
+                        'visibility': 'none'
+                    }}
+                />
             </Map>
 
-            {/* Cloud Layer - Overlaying the map */}
             <div className="absolute inset-0 pointer-events-none z-10 opacity-40 mix-blend-overlay">
-                {/* Moving Clouds Animation */}
                 <div className="absolute top-0 left-0 w-[200%] h-full flex animate-clouds">
                     <img src="/cloud.webp" alt="clouds" className="w-1/2 h-full object-cover" />
                     <img src="/cloud.webp" alt="clouds" className="w-1/2 h-full object-cover" />
