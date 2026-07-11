@@ -21,8 +21,8 @@ interface VisitorsState {
   updatePosition: (id: string, x: number, y: number) => void;
   bringToFront: (id: string) => void;
   shuffleCards: () => void;
-  loadFromStorage: () => void;
   saveToStorage: () => void;
+  loadFromDatabase: (dbCards: any[]) => void;
 }
 
 const STORAGE_KEY = 'visitors-wall-data';
@@ -35,12 +35,13 @@ export const useVisitorsStore = create<VisitorsState>((set, get) => ({
 
   addCard: (newCardData) => {
     // Card dimensions (matching VisitorCard.tsx)
-    const cardWidth = 200;
-    const cardHeight = 280;
+    const cardWidth = 140;
+    const cardHeight = 180;
 
-    // Use a reasonable container width (most content areas are max 1200-1400px)
-    const containerWidth = Math.min(window.innerWidth * 0.9, 1200);
-    const containerHeight = 600; // min-height from VisitorsWall
+    // Use actual canvas bounds (max 540px wrapper * 1.4 for the 140% pannable area)
+    const baseWidth = typeof window !== 'undefined' ? Math.min(window.innerWidth - 32, 540) : 540;
+    const containerWidth = baseWidth * 1.4;
+    const containerHeight = 600 * 1.4; // 140% of the 600px min-height
 
     // Margins to keep cards well within bounds
     const margin = 50;
@@ -86,12 +87,13 @@ export const useVisitorsStore = create<VisitorsState>((set, get) => ({
 
   shuffleCards: () => {
     // Card dimensions (matching VisitorCard.tsx)
-    const cardWidth = 200;
-    const cardHeight = 280;
+    const cardWidth = 140;
+    const cardHeight = 180;
 
-    // Use a reasonable container width (most content areas are max 1200-1400px)
-    const containerWidth = Math.min(window.innerWidth * 0.9, 1200);
-    const containerHeight = 600; // min-height from VisitorsWall
+    // Use actual canvas bounds (max 540px wrapper * 1.4 for the 140% pannable area)
+    const baseWidth = typeof window !== 'undefined' ? Math.min(window.innerWidth - 32, 540) : 540;
+    const containerWidth = baseWidth * 1.4;
+    const containerHeight = 600 * 1.4; // 140% of the 600px min-height
 
     // Margins to keep cards well within bounds
     const margin = 50;
@@ -116,14 +118,52 @@ export const useVisitorsStore = create<VisitorsState>((set, get) => ({
     localStorage.setItem(STORAGE_KEY, JSON.stringify(get().cards));
   },
 
-  loadFromStorage: () => {
+  loadFromDatabase: (dbCards) => {
     const stored = localStorage.getItem(STORAGE_KEY);
+    let localCards: VisitorCardType[] = [];
     if (stored) {
       try {
-        set({ cards: JSON.parse(stored) });
+        localCards = JSON.parse(stored);
       } catch (e) {
         console.error("Failed to parse stored visitors", e);
       }
     }
+
+    const cardWidth = 140;
+    const cardHeight = 180;
+    const baseWidth = typeof window !== 'undefined' ? Math.min(window.innerWidth - 32, 540) : 540;
+    const containerWidth = baseWidth * 1.4;
+    const containerHeight = 600 * 1.4;
+    const margin = 50;
+    const maxX = containerWidth - cardWidth - margin;
+    const maxY = containerHeight - cardHeight - margin;
+
+    const mergedCards = dbCards.map((dbCard) => {
+      const local = localCards.find((c) => c.id === dbCard.id.toString());
+      if (local) {
+        return {
+          ...dbCard,
+          id: dbCard.id.toString(),
+          image: dbCard.imageUrl,
+          x: local.x,
+          y: local.y,
+          rotation: local.rotation,
+          zIndex: local.zIndex,
+        };
+      }
+      
+      return {
+        ...dbCard,
+        id: dbCard.id.toString(),
+        image: dbCard.imageUrl,
+        x: margin + Math.random() * Math.max(0, maxX - margin),
+        y: margin + Math.random() * Math.max(0, maxY - margin),
+        rotation: Math.random() * 30 - 15,
+        zIndex: 1,
+      };
+    });
+
+    set({ cards: mergedCards });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedCards));
   },
 }));

@@ -14,9 +14,13 @@ export async function uploadVisitorCard(formData: FormData) {
     throw new Error('Missing required fields');
   }
 
+  // Generate a unique filename to prevent collisions
+  const uniqueFilename = `${Date.now()}-${file.name}`;
+
   // Upload to Vercel Blob
-  const blob = await put(file.name, file, {
+  const blob = await put(uniqueFilename, file, {
     access: 'public',
+    addRandomSuffix: true,
   });
 
   // Save to Neon Database

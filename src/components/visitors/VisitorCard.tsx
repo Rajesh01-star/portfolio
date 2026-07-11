@@ -11,14 +11,22 @@ interface VisitorCardProps {
 const VisitorCard: React.FC<VisitorCardProps> = ({ card, gridIndex }) => {
   const { bringToFront, updatePosition, viewMode } = useVisitorsStore();
 
-  // Grid layout calculation
-  const columns = window.innerWidth < 768 ? 1 : 3;
-  const cardWidth = window.innerWidth < 768 ? 240 : 200;
-  const cardHeight = window.innerWidth < 768 ? 320 : 280;
-  const gap = 20;
+  // Grid layout calculation for 540px max-width container
+  const containerWidth = typeof window !== 'undefined' ? Math.min(window.innerWidth - 32, 540) : 540;
   
-  const gridX = gridIndex !== undefined ? (gridIndex % columns) * (cardWidth + gap) + (window.innerWidth / 2 - (columns * (cardWidth + gap)) / 2) : 0;
-  const gridY = gridIndex !== undefined ? Math.floor(gridIndex / columns) * (cardHeight + gap) + 150 : 0;
+  // Calculate how many columns can fit. Card is 140px, gap is 16px.
+  // 3 columns need ~452px. 2 columns need ~296px.
+  const columns = containerWidth < 460 ? 2 : 3;
+  
+  const cardWidth = 140;
+  const cardHeight = 180;
+  const gap = 16;
+  
+  const totalGridWidth = (columns * cardWidth) + ((columns - 1) * gap);
+  const startX = Math.max(0, (containerWidth - totalGridWidth) / 2);
+  
+  const gridX = gridIndex !== undefined ? startX + (gridIndex % columns) * (cardWidth + gap) : 0;
+  const gridY = gridIndex !== undefined ? Math.floor(gridIndex / columns) * (cardHeight + gap) + 40 : 0;
 
   const isGrid = viewMode === 'grid';
 
@@ -45,24 +53,26 @@ const VisitorCard: React.FC<VisitorCardProps> = ({ card, gridIndex }) => {
       }}
       whileHover={{ scale: 1.05, zIndex: 1000, transition: { duration: 0.2 } }}
       whileDrag={{ scale: 1.1, cursor: 'grabbing', zIndex: 1000 }}
-      className={`absolute cursor-grab p-3 bg-[#262626] border border-white/5 shadow-2xl rounded-2xl w-[200px] md:w-[200px] flex flex-col`}
+      className={`absolute cursor-grab p-2 bg-white dark:bg-[#262626] border border-black/10 dark:border-white/5 shadow-2xl rounded-2xl flex flex-col`}
       style={{ 
+        width: cardWidth,
+        height: cardHeight,
         userSelect: 'none',
         touchAction: 'none'
       }}
     >
-      <div className="bg-[#D1D1D1] w-full aspect-square overflow-hidden rounded-xl">
+      <div className="bg-neutral-100 dark:bg-[#D1D1D1] w-full aspect-square overflow-hidden rounded-xl">
         <img 
           src={card.image} 
           alt={`Post by ${card.username}`} 
           className="w-full h-full object-contain pointer-events-none"
         />
       </div>
-      <div className="mt-3 flex flex-col">
-        <span className="text-[#A3A3A3] font-bold text-sm leading-tight flex items-center gap-1">
+      <div className="mt-2 flex flex-col px-1">
+        <span className="text-neutral-500 dark:text-[#A3A3A3] font-bold text-[10px] leading-tight flex items-center gap-1 truncate">
           {card.username}
         </span>
-        <p className="text-white text-sm font-medium mt-1">
+        <p className="text-black dark:text-white text-xs font-medium mt-0.5 truncate">
           {card.caption}
         </p>
       </div>

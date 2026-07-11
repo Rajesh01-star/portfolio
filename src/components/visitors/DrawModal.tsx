@@ -2,8 +2,11 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ReactSketchCanvas, ReactSketchCanvasRef } from 'react-sketch-canvas';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Undo2, Redo2, Eraser, Trash2 } from 'lucide-react';
+import { Undo2, Redo2, Eraser, Trash2, Loader2 } from 'lucide-react';
 import { useVisitorsStore } from '../../store/useVisitorsStore';
+import { uploadVisitorCard } from '../../actions/upload';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 interface DrawModalProps {
   isOpen: boolean;
@@ -26,6 +29,21 @@ const DrawModal: React.FC<DrawModalProps> = ({ isOpen, onClose }) => {
   const [charCount, setCharCount] = useState(0);
   const MAX_CHARS = 50;
 
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: uploadVisitorCard,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['visitorCards'] });
+      onClose();
+      resetFields();
+      toast.success('Your drawing is now on the wall! 🎨');
+    },
+    onError: (error) => {
+      console.error('Upload failed:', error);
+      toast.error('Upload failed. Please try again.');
+    },
+  });
+
   const addCard = useVisitorsStore((state) => state.addCard);
 
   useEffect(() => {
@@ -36,15 +54,21 @@ const DrawModal: React.FC<DrawModalProps> = ({ isOpen, onClose }) => {
     if (!canvasRef.current) return;
     try {
       const dataUrl = await canvasRef.current.exportImage('png');
-      addCard({
-        image: dataUrl,
-        caption: caption || 'A beautiful doodle',
-        username: username || 'Anonymous Artist',
-      });
-      onClose();
-      resetFields();
+      
+      // Convert base64 dataUrl to File
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+      const file = new File([blob], "drawing.png", { type: "image/png" });
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('caption', caption || 'A beautiful doodle');
+      formData.append('username', username || 'Anonymous Artist');
+
+      mutation.mutate(formData);
     } catch (err) {
       console.error("Failed to export drawing", err);
+      toast.error('Failed to process drawing. Please try again.');
     }
   };
 
@@ -199,9 +223,10 @@ const DrawModal: React.FC<DrawModalProps> = ({ isOpen, onClose }) => {
                 </button>
                 <button
                   onClick={handleSave}
-                  className="px-6 py-2 rounded-lg bg-[#A3A3A3] text-black text-xs font-bold hover:bg-white transition-colors"
+                  disabled={mutation.isPending}
+                  className="px-6 py-2 rounded-lg bg-[#A3A3A3] text-black text-xs font-bold hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[70px]"
                 >
-                  Submit
+                  {mutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Submit'}
                 </button>
               </div>
             </div>

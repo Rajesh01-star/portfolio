@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Image as ImageIcon, UploadCloud, Loader2 } from 'lucide-react';
 import { useVisitorsStore } from '../../store/useVisitorsStore';
 import { uploadVisitorCard } from '../../actions/upload';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -14,9 +16,22 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => {
   const [preview, setPreview] = useState<string | null>(null);
   const [caption, setCaption] = useState('');
   const [username, setUsername] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const addCard = useVisitorsStore((state) => state.addCard);
+  
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: uploadVisitorCard,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['visitorCards'] });
+      onClose();
+      reset();
+      toast.success('Image successfully posted! 📸');
+    },
+    onError: (error) => {
+      console.error('Upload failed:', error);
+      toast.error('Upload failed. Please try again.');
+    },
+  });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -33,33 +48,15 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (preview && fileInputRef.current?.files?.[0]) {
-      setIsUploading(true);
-      try {
-        const formData = new FormData();
-        formData.append('file', fileInputRef.current.files[0]);
-        formData.append('caption', caption || 'A snapshot of a moment');
-        formData.append('username', username || 'Anonymous');
+      const formData = new FormData();
+      formData.append('file', fileInputRef.current.files[0]);
+      formData.append('caption', caption || 'A snapshot of a moment');
+      formData.append('username', username || 'Anonymous');
 
-        await uploadVisitorCard(formData);
-        
-        // Also add to local store for immediate UI update without refresh if desired
-        addCard({
-          image: preview,
-          caption: caption || 'A snapshot of a moment',
-          username: username || 'Anonymous',
-        });
-        
-        onClose();
-        reset();
-      } catch (error) {
-        console.error('Upload failed:', error);
-        alert('Upload failed. Please try again.');
-      } finally {
-        setIsUploading(false);
-      }
+      mutation.mutate(formData);
     }
   };
 
@@ -155,10 +152,10 @@ const UploadModal: React.FC<UploadModalProps> = ({ isOpen, onClose }) => {
                 </button>
                 <button
                   type="submit"
-                  disabled={!preview || isUploading}
+                  disabled={!preview || mutation.isPending}
                   className="flex-1 px-3 py-2 rounded-xl bg-white text-black hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-bold flex justify-center items-center text-xs"
                 >
-                  {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Upload'}
+                  {mutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Upload'}
                 </button>
               </div>
             </form>
