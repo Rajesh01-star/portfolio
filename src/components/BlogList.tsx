@@ -7,19 +7,19 @@ const posts = [
     {
         title: "Building a Realtime Sudoku Game",
         date: "Feb 08, 2026",
-        slug: "#",
+        slug: "/not-found",
         views: "1.2k"
     },
     {
         title: "Why I Switched from Gatsby to Next.js",
         date: "Jan 15, 2026",
-        slug: "#",
+        slug: "/not-found",
         views: "850"
     },
     {
         title: "Mastering Tailwind CSS Grid",
         date: "Dec 22, 2025",
-        slug: "#",
+        slug: "/not-found",
         views: "2.1k"
     }
 ];
@@ -29,7 +29,7 @@ export function BlogList() {
         <section className="flex flex-col gap-6">
             <div className="flex items-center justify-between px-4 sm:px-0">
                 <h2 className="text-xl font-bold text-neutral-900 dark:text-white">Writing</h2>
-                <Link href="/blog" className="text-sm text-zinc-500 hover:text-neutral-900 dark:hover:text-white transition-colors flex items-center gap-1">
+                <Link href="/not-found" className="text-sm text-zinc-500 hover:text-neutral-900 dark:hover:text-white transition-colors flex items-center gap-1">
                     View All <ArrowRight size={14} />
                 </Link>
             </div>
