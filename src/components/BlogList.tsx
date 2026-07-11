@@ -28,8 +28,8 @@ export function BlogList() {
     return (
         <section className="flex flex-col gap-6">
             <div className="flex items-center justify-between px-4 sm:px-0">
-                <h2 className="text-xl font-bold text-white">Writing</h2>
-                <Link href="/blog" className="text-sm text-zinc-500 hover:text-white transition-colors flex items-center gap-1">
+                <h2 className="text-xl font-bold text-neutral-900 dark:text-white">Writing</h2>
+                <Link href="/blog" className="text-sm text-zinc-500 hover:text-neutral-900 dark:hover:text-white transition-colors flex items-center gap-1">
                     View All <ArrowRight size={14} />
                 </Link>
             </div>
@@ -39,10 +39,10 @@ export function BlogList() {
                     <Link
                         href={post.slug}
                         key={index}
-                        className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 rounded-xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/5"
+                        className="group flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 rounded-xl hover:bg-neutral-100 dark:hover:bg-white/5 transition-colors border border-transparent hover:border-neutral-200 dark:hover:border-white/5"
                     >
                         <div className="flex flex-col gap-1">
-                            <h3 className="text-white font-medium group-hover:text-blue-400 transition-colors">
+                            <h3 className="text-neutral-900 dark:text-white font-medium group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">
                                 {post.title}
                             </h3>
                             <div className="flex items-center gap-2 text-xs text-zinc-500">
