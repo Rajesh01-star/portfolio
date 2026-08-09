@@ -66,62 +66,64 @@ export default function ProjectsPage() {
   );
 
   return (
-    <div className="space-y-8 bg-white/90 dark:bg-[#0E0E0E]/90 vibe:bg-black/60 backdrop-blur-md vibe:backdrop-blur-3xl rounded-[20px] border border-black/5 dark:border-white/5 vibe:border-white/10 overflow-hidden shadow-2xl p-6 sm:p-8 mt-4">
-      {/* Page Header */}
-      <div className="relative pb-6 border-b border-black/5 dark:border-white/5">
-        <div className="flex justify-between items-start">
-          <div>
-            <span className="text-[10px] font-mono tracking-widest uppercase text-blue-500 dark:text-blue-400 font-bold">
-              Portfolio / Projects
-            </span>
-            <h1 className="text-3xl font-extrabold tracking-tight text-neutral-900 dark:text-white mt-1">
-              Projects
-            </h1>
-            <p className="text-sm text-zinc-500 mt-2 max-w-sm sm:max-w-md">
-              A curated collection of SaaS platforms, web applications, bot automation, and early frontend experiments.
-            </p>
-          </div>
-          <div className="hidden sm:flex flex-col items-end text-right">
-            <span className="text-2xl font-bold text-neutral-950 dark:text-neutral-200">{projects.length}</span>
-            <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Total Builds</span>
+    <div className="max-w-[540px] mx-auto px-4 sm:px-0">
+      <div className="space-y-8 bg-white/90 dark:bg-[#0E0E0E]/90 vibe:bg-black/60 backdrop-blur-md vibe:backdrop-blur-3xl rounded-[20px] border border-black/5 dark:border-white/5 vibe:border-white/10 overflow-hidden shadow-2xl p-6 sm:p-8 mt-4">
+        {/* Page Header */}
+        <div className="relative pb-6 border-b border-black/5 dark:border-white/5">
+          <div className="flex justify-between items-start">
+            <div>
+              <span className="text-[10px] font-mono tracking-widest uppercase text-blue-500 dark:text-blue-400 font-bold">
+                Portfolio / Projects
+              </span>
+              <h1 className="text-3xl font-extrabold tracking-tight text-neutral-900 dark:text-white mt-1">
+                Projects
+              </h1>
+              <p className="text-sm text-zinc-500 mt-2 max-w-sm sm:max-w-md">
+                A curated collection of SaaS platforms, web applications, bot automation, and early frontend experiments.
+              </p>
+            </div>
+            <div className="hidden sm:flex flex-col items-end text-right">
+              <span className="text-2xl font-bold text-neutral-950 dark:text-neutral-200">{projects.length}</span>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Total Builds</span>
+            </div>
           </div>
         </div>
+
+        {/* Main Works Section */}
+        {works.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xs font-semibold tracking-wider uppercase text-zinc-400 font-mono">Selected Works</h2>
+              <div className="h-[1px] bg-black/5 dark:bg-white/5 flex-grow" />
+            </div>
+            {renderProjectGrid(works)}
+          </section>
+        )}
+
+        {/* Small Projects Section */}
+        {smallProjects.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xs font-semibold tracking-wider uppercase text-zinc-400 font-mono">Small Projects</h2>
+              <div className="h-[1px] bg-black/5 dark:bg-white/5 flex-grow" />
+            </div>
+            {renderProjectGrid(smallProjects)}
+          </section>
+        )}
+
+        {/* Old Works Section */}
+        {oldWorks.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xs font-semibold tracking-wider uppercase text-zinc-400 font-mono">Old Works</h2>
+              <div className="h-[1px] bg-black/5 dark:bg-white/5 flex-grow" />
+            </div>
+            {renderProjectGrid(oldWorks)}
+          </section>
+        )}
+
+        <Footer />
       </div>
-
-      {/* Main Works Section */}
-      {works.length > 0 && (
-        <section className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-xs font-semibold tracking-wider uppercase text-zinc-400 font-mono">Selected Works</h2>
-            <div className="h-[1px] bg-black/5 dark:bg-white/5 flex-grow" />
-          </div>
-          {renderProjectGrid(works)}
-        </section>
-      )}
-
-      {/* Small Projects Section */}
-      {smallProjects.length > 0 && (
-        <section className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-xs font-semibold tracking-wider uppercase text-zinc-400 font-mono">Small Projects</h2>
-            <div className="h-[1px] bg-black/5 dark:bg-white/5 flex-grow" />
-          </div>
-          {renderProjectGrid(smallProjects)}
-        </section>
-      )}
-
-      {/* Old Works Section */}
-      {oldWorks.length > 0 && (
-        <section className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <h2 className="text-xs font-semibold tracking-wider uppercase text-zinc-400 font-mono">Old Works</h2>
-            <div className="h-[1px] bg-black/5 dark:bg-white/5 flex-grow" />
-          </div>
-          {renderProjectGrid(oldWorks)}
-        </section>
-      )}
-
-      <Footer />
     </div>
   );
 }

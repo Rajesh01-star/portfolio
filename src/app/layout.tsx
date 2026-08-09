@@ -82,7 +82,7 @@ export default function RootLayout({
                 {/* Global Background */}
                 <GlobalBackground />
 
-              <main className="relative mx-auto mt-2 w-full max-w-[540px] px-4 sm:px-0 z-10 pb-20">
+              <main className="relative mx-auto mt-2 w-full z-10 pb-20">
                 {children}
               </main>
 
