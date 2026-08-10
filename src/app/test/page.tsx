@@ -13,7 +13,7 @@ const ImagingViewerTestPage: React.FC = () => {
       <div className="border-[3px] border-blue-500 rounded-xl overflow-hidden w-full shadow-lg bg-white dark:bg-[#161C25]">
         {/* Ravid Embed */}
         <iframe
-          src="https://test-dev.ravid.cloud/imaging-viewer/embed?bgColor=000000&theme=dark&redirectUrl=https://portfolio-phi-roan-82.vercel.app/"
+          src="https://test-dev.ravid.cloud/imaging-viewer/embed?bgColor=000000&theme=dark&redirectUrl=https://portfolio-phi-roan-82.vercel.app/test"
           width="100%"
           height="750px"
           style={{ border: 'none', display: 'block' }}
