@@ -16,13 +16,13 @@ const ImagingViewerTestPage: React.FC = () => {
       <div className="border-[3px] border-blue-500 rounded-xl overflow-hidden w-full shadow-lg bg-white dark:bg-[#161C25]">
         {/* Ravid Embed — embed.js reads payment return params from URL and injects into iframe automatically */}
         <iframe
-          src="https://test-dev.ravid.cloud/imaging-viewer/embed?bgColor=ffffff&theme=light&accentColor=2563EB&partner_code=QGF2ZZXWWA&redirectUrl=https%3A%2F%2Farvpanda-portfolio.vercel.app%2Ftest"
+          src="https://test-dev.ravid.cloud/imaging-viewer/embed?bgColor=ffffff&theme=light&accentColor=2563EB&partner_code=MBZNYW4TK3&redirectUrl=https%3A%2F%2Farvpanda-portfolio.vercel.app"
           width="100%"
           height="750px"
           style={{ border: 'none', display: 'block' }}
           referrerPolicy="no-referrer-when-downgrade"
           title="Ravid Imaging Viewer"
-        ></iframe>
+        />
       </div>
     </div>
   );
